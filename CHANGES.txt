@@ -1,0 +1,5 @@
+v0.1, 18 Feb 2013 -- Initial release.
+v0.2, 3 July 2013 -- Fixed some bugs and added files missing from v0.1.
+v0.3, 3 July 2013 -- Added examples.
+v0.4, 22 September 2013 -- Major refactoring. Added support for the Thibault multiple probe mode reconstruction.
+v0.5 6 October 2013 - Switch to ePIE algorithm with mulit-mode probe reconstruction.

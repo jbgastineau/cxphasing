@@ -1,0 +1,2 @@
+include *.txt, data/lena128.npy, data/baboon128.npy, data/lena256.npy
+recursive-include docs *.txt

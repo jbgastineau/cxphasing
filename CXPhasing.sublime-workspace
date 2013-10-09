@@ -1,0 +1,1094 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"hammi",
+				"hamming_window"
+			],
+			[
+				"new",
+				"newaxis"
+			],
+			[
+				"simual",
+				"simulate_data"
+			],
+			[
+				"mea",
+				"measurement"
+			],
+			[
+				"update",
+				"update_probe"
+			],
+			[
+				"al",
+				"algorithm_name"
+			],
+			[
+				"modal",
+				"modal_sum"
+			],
+			[
+				"opr",
+				"operation"
+			],
+			[
+				"view",
+				"view_modes"
+			],
+			[
+				"fun",
+				"func_name"
+			],
+			[
+				"algo",
+				"algorithm"
+			],
+			[
+				"algori",
+				"algorithm_count"
+			],
+			[
+				"begin",
+				"begin_updating_probe"
+			],
+			[
+				"actual",
+				"actual_psi_modes"
+			],
+			[
+				"recons",
+				"reconstruction"
+			],
+			[
+				"probe_in",
+				"probe_intensity"
+			],
+			[
+				"probe_int",
+				"probe_mode_intensity"
+			],
+			[
+				"psi",
+				"psi_modes"
+			],
+			[
+				"probe_intensity_modes",
+				"probe_intensity_modes_map"
+			],
+			[
+				"probe_inte",
+				"probe_intensity_modes_sum"
+			],
+			[
+				"probe",
+				"probe_intensity_modes"
+			],
+			[
+				"probe_mode",
+				"probe_modes_sum"
+			],
+			[
+				"beamstop",
+				"beamstop_material"
+			],
+			[
+				"prepro",
+				"preprocess_data"
+			],
+			[
+				"beam_stop_",
+				"beam_stop_factor"
+			],
+			[
+				"refresh",
+				"refresh_time"
+			],
+			[
+				"schem",
+				"schema_key"
+			],
+			[
+				"shar",
+				"share_dir"
+			],
+			[
+				"apache",
+				"apache_group"
+			],
+			[
+				"apach",
+				"apache_user"
+			],
+			[
+				"thum",
+				"thumb_row_height"
+			],
+			[
+				"thumb",
+				"thumb_row_height"
+			],
+			[
+				"thumb_ro",
+				"thumb_row_width"
+			],
+			[
+				"thumb_row",
+				"thumb_row_height"
+			],
+			[
+				"form",
+				"format_for_1_image"
+			],
+			[
+				"get",
+				"getContext"
+			],
+			[
+				"cl",
+				"className"
+			],
+			[
+				"image2",
+				"image2_canvas"
+			],
+			[
+				"imag",
+				"image2_div"
+			],
+			[
+				"tot",
+				"total_width"
+			],
+			[
+				"sql_",
+				"sql_exec_fetch"
+			],
+			[
+				"ima",
+				"image_to_png"
+			],
+			[
+				"det",
+				"det_channel"
+			],
+			[
+				"margin",
+				"margin-right"
+			],
+			[
+				"backg",
+				"background-color"
+			],
+			[
+				"format_for",
+				"format_for_2_images"
+			],
+			[
+				"total_",
+				"total_width"
+			],
+			[
+				"copy",
+				"copy_tree"
+			],
+			[
+				"inth",
+				"in_thread"
+			],
+			[
+				"dets",
+				"dets_posted"
+			],
+			[
+				"connect",
+				"connected_dets"
+			],
+			[
+				"sql",
+				"sql_exec"
+			],
+			[
+				"ioc",
+				"ioc_name"
+			],
+			[
+				"exe",
+				"sql_exec_fetch"
+			],
+			[
+				"print",
+				"print_tty"
+			],
+			[
+				"cached",
+				"cached_data"
+			],
+			[
+				"dra",
+				"drawVisualization"
+			],
+			[
+				"chec",
+				"checked"
+			],
+			[
+				"dets_",
+				"dets_valid"
+			],
+			[
+				"rad",
+				"rad_num"
+			],
+			[
+				"updat",
+				"update_P1RA"
+			],
+			[
+				"data",
+				"data_string"
+			],
+			[
+				"upd",
+				"update_scan_metadata"
+			],
+			[
+				"slo",
+				"slow_units"
+			],
+			[
+				"fast",
+				"fast_desc"
+			],
+			[
+				"create_",
+				"create_select_detectors_minipage"
+			],
+			[
+				"slow",
+				"slow_desc"
+			],
+			[
+				"nu",
+				"null_pv_value"
+			],
+			[
+				"scan_",
+				"scan_thread"
+			],
+			[
+				"glo",
+				"globals_dict"
+			],
+			[
+				"glob",
+				"globals_dict"
+			],
+			[
+				"upda",
+				"update_object"
+			],
+			[
+				"min_",
+				"min_k"
+			],
+			[
+				"loc",
+				"local_position_transform"
+			],
+			[
+				"mul",
+				"multiprocess"
+			],
+			[
+				"globa",
+				"global_position_transform"
+			],
+			[
+				"ge",
+				"get_global_params"
+			],
+			[
+				"ptych",
+				"ptycho_subpixel_shift"
+			],
+			[
+				"global_s",
+				"ppc_global_skew"
+			],
+			[
+				"sea",
+				"search_rot"
+			],
+			[
+				"sear",
+				"search_rad"
+			],
+			[
+				"search",
+				"search_skew"
+			],
+			[
+				"ppc_glob",
+				"ppc_global_scale"
+			],
+			[
+				"ppc_glo",
+				"ppc_global_skew"
+			],
+			[
+				"ppc_di",
+				"ppc_dict_len"
+			],
+			[
+				"tran",
+				"transformed_initial_position"
+			],
+			[
+				"transfo",
+				"transformed_initial_position"
+			],
+			[
+				"correct_",
+				"correct_skew"
+			],
+			[
+				"mult",
+				"multip"
+			],
+			[
+				"optimi",
+				"optimise_global_ppc_parameters_worker"
+			],
+			[
+				"global",
+				"global_params_dict"
+			],
+			[
+				"close",
+				"close_out"
+			],
+			[
+				"job",
+				"jobs_completed"
+			],
+			[
+				"completed",
+				"completed_jobs"
+			],
+			[
+				"update_o",
+				"update_object_single_position"
+			],
+			[
+				"shu",
+				"shuffle_pos"
+			],
+			[
+				"mac",
+				"machine"
+			],
+			[
+				"prep",
+				"preprocessing"
+			],
+			[
+				"split",
+				"split_seq"
+			],
+			[
+				"spli",
+				"split_seq"
+			],
+			[
+				"obj",
+				"update_object_worker"
+			],
+			[
+				"prob",
+				"probe_position_correction"
+			],
+			[
+				"csc",
+				"csc_arg"
+			],
+			[
+				"initi",
+				"initial_scl"
+			],
+			[
+				"csk",
+				"csk_arg"
+			],
+			[
+				"simu",
+				"simulate_data"
+			],
+			[
+				"a",
+				"arr"
+			],
+			[
+				"phase",
+				"phaseFactor"
+			],
+			[
+				"fftw_",
+				"fftw_complex"
+			],
+			[
+				"fftw",
+				"fftw_complex"
+			],
+			[
+				"pos",
+				"pos_correction"
+			],
+			[
+				"tri",
+				"ppc_trial_positions"
+			],
+			[
+				"pro",
+				"probe_position_correction"
+			],
+			[
+				"shift",
+				"shift_inner"
+			],
+			[
+				"recon",
+				"reconstruction"
+			],
+			[
+				"reco",
+				"reconstruction"
+			],
+			[
+				"ob_mo",
+				"ob_mod_squared_map"
+			],
+			[
+				"ca",
+				"calc_error"
+			],
+			[
+				"reg",
+				"reg_filt"
+			],
+			[
+				"probe_",
+				"probe_mod_squared"
+			],
+			[
+				"rec",
+				"reconstruction"
+			],
+			[
+				"cho",
+				"choose_optimal_regularisation"
+			],
+			[
+				"darkfie",
+				"darkfield_filename"
+			],
+			[
+				"darkf",
+				"darkfield_filename"
+			],
+			[
+				"whitefi",
+				"whitefield_filename"
+			],
+			[
+				"comp",
+				"completed_filenames"
+			],
+			[
+				"sa",
+				"saturation_level"
+			],
+			[
+				"multip",
+				"multiprocess_this"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "cxphasing/CXPhasing2.py",
+			"settings":
+			{
+				"buffer_size": 38720,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "cxphasing/cxparams/CXParams_v05_sec34Robinson.py",
+			"settings":
+			{
+				"buffer_size": 10102,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "cxphasing/CXData2.py",
+			"settings":
+			{
+				"buffer_size": 39734,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 392.0,
+		"selected_items":
+		[
+			[
+				"dis",
+				"Package Control: Disable Package"
+			],
+			[
+				"enab",
+				"Package Control: Enable Package"
+			],
+			[
+				"Package Control: ",
+				"Package Control: Disable Package"
+			],
+			[
+				"lin",
+				"SublimeLinter: Lint Current File"
+			],
+			[
+				"",
+				"About"
+			],
+			[
+				"li",
+				"SublimeLinter: Lint Current File"
+			],
+			[
+				"linter",
+				"SublimeLinter: Lint Current File"
+			],
+			[
+				"ins",
+				"Package Control: Install Package"
+			],
+			[
+				"rem",
+				"Package Control: Remove Package"
+			],
+			[
+				"su",
+				"SublimeHg: Open Menu"
+			],
+			[
+				"Snippet: ",
+				"Snippet: #!/usr/bin/env"
+			]
+		],
+		"width": 392.0
+	},
+	"console":
+	{
+		"height": 146.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/home/david/python/CXPhasing/cxphasing/cxparams/CXParams.py",
+		"/home/david/python/CXPhasing/tests/test_CXModal.py",
+		"/home/david/python/CXPhasing/cxphasing/CXUtils.py",
+		"/home/david/python/CXPhasing/cxphasing/CXFileReader.py",
+		"/home/david/python/CXPhasing/cxphasing/__init__.py",
+		"/home/david/python/CXPhasing/MANIFEST",
+		"/home/david/python/CXPhasing/cxphasing/cxparams/__init__.py",
+		"/home/david/python/CXPhasing/cxphasing/cxparams/CXParams_APSlaptop_sec34Robinson.py",
+		"/home/david/python/CXPhasing/CHANGES.txt",
+		"/home/david/python/CXPhasing/setup.py",
+		"/home/david/python/CXPhasing/cxphasing/cxparams/CXParams_APSlaptop_sim128.py",
+		"/home/david/python/CXPhasing/bin/phasing.py",
+		"/home/david/python/CXPhasing/cxphasing/CXParams.py",
+		"/home/david/python/CXPhasing/cxphasing/cxparams/CXParams_APSlaptop_sc6.py",
+		"/home/david/python/CXPhasing/cxphasing/cxparams/CXParams_simulation128.py",
+		"/home/david/python/CXPhasing/cxphasing/CXPhasing.py",
+		"/home/david/python/CXPhasing/MANIFEST~",
+		"/home/david/python/EpicsArchiver/bin/pvarch",
+		"/home/david/python/CXPhasing/cxphasing/CXResolutionEstimate.py",
+		"/home/david/python/CXPhasing/cxphasing/vine_utils.py",
+		"/home/david/python/CXPhasing/cxphasing/CXData.py",
+		"/home/david/python/various/cplot.py",
+		"/home/david/python/CXPhasing/cxphasing/multiprocess.py",
+		"/home/david/python/CXPhasing/cxphasing/cxparams/CXParams_simulation256.py",
+		"/home/david/python/CXPhasing/cxphasing/CXDb.py",
+		"/home/david/python/CXPhasing/cxphasing/blind_regularization_estimation.py",
+		"/home/david/python/CXPhasing/CXParams.py",
+		"/home/david/python/CXPhasing/CXData.py",
+		"/home/david/python/CXPhasing/CXPhasing.py",
+		"/home/david/python/EpicsArchiver/lib/config.py",
+		"/home/david/python/EpicsArchiver/js/epics_archiver.js",
+		"/home/david/python/EpicsArchiver/lib/ArchiveMaster.py",
+		"/home/david/python/EpicsArchiver/lib/ScanViewerJS.py",
+		"/home/david/python/EpicsArchiver/config.py",
+		"/home/david/python/CXPhasing/init_CXPhasing_mysql.py",
+		"/home/david/python/EpicsArchiver/lib/WebStatus.py",
+		"/home/david/python/EpicsArchiver/lib/HTMLWriter.py",
+		"/home/david/python/EpicsArchiver/lib/PlotViewer.py",
+		"/home/david/python/EpicsArchiver/cgi-bin/show.py",
+		"/home/david/python/EpicsArchiver/setup.py",
+		"/home/david/python/EpicsArchiver/lib/ScanViewer.py",
+		"/home/david/python/EpicsArchiver/lib/__init__.py",
+		"/home/david/test.html",
+		"/home/david/python/EpicsArchiver/README",
+		"/home/david/python/various/test_mpl.py",
+		"/home/david/python/vine_utils.py",
+		"/home/david/python/EpicsArchiver/lib/SimpleDB.py",
+		"/home/david/python/EpicsArchiver/lib/Cache.py",
+		"/home/david/archive/mplh5canvas/mplh5canvas/base_page.py",
+		"/home/david/archive/mplh5canvas/examples/multi_plot.py",
+		"/home/david/archive/mplh5canvas/examples/imshow_plot.py",
+		"/home/david/archive/mplh5canvas/mplh5canvas/backend_h5canvas.py",
+		"/home/david/archive/mplh5canvas/tests/rec.py",
+		"/home/david/archive/mplh5canvas/tests/test.py",
+		"/home/david/archive/mplh5canvas/setup.py",
+		"/home/david/archive/mplh5canvas/mplh5canvas/msgutil.py",
+		"/home/david/archive/mplh5canvas/mplh5canvas/__init__.py",
+		"/home/david/python/django/cxphasing/cxp/views.py",
+		"/home/david/python/EpicsArchiver/lib/MasterDB.py",
+		"/home/david/python/django/cxphasing/templates/cxp/chart.html",
+		"/home/david/python/EpicsArchiver/json_test.html",
+		"/home/david/python/EpicsArchiver/pvarch_init.sql",
+		"/home/david/.config/sublime-text-2/Packages/User/Preferences.sublime-settings",
+		"/home/david/python/django/cxphasing/templates/cxp/chart_old.html",
+		"/home/david/python/django/cxphasing/templates/cxp/test_charts.html",
+		"/home/david/python/django/cxphasing/templates/cxp/lame_old.html",
+		"/home/david/python/django/cxphasing/templates/cxp/lame.html",
+		"/home/david/python/django/cxphasing/cxp/urls.py",
+		"/home/david/python/EpicsArchiver/deploy.sh",
+		"/home/david/bin/deploy_EpicsArchiver.sh",
+		"/home/david/python/django/cxphasing/templates/cxp/plot.html",
+		"/home/david/python/EpicsArchiver/lib/Archiver.py",
+		"/home/david/python/EpicsArchiver/lib/start_scan.py",
+		"/home/david/python/EpicsArchiver/init_pvarch",
+		"/home/david/.config/sublime-text-2/Packages/User/SublimeLinter.sublime-settings",
+		"/home/david/python/EpicsArchiver/lib/Cache_Scan.py",
+		"/home/david/python/EpicsArchiver/deployment notes.txt",
+		"/home/david/.config/sublime-text-2/Packages/User/Package Control.sublime-settings",
+		"/home/david/.config/sublime-text-2/Packages/Package Control/Package Control.sublime-settings",
+		"/home/david/bin/pvarch",
+		"/home/david/python/EpicsArchiver/bin/run_cache.py",
+		"/usr/bin/pvarch",
+		"/home/david/python/CXPhasing/README.txt",
+		"/home/david/python/CXPhasing/LICENCE",
+		"/home/david/Ubuntu One/presentations/2012-12-15 Workshop on Diffraction Limited Storage Rings/energy_resolution_space.py",
+		"/home/david/python/EpicsArchiver/lib/Scan.py",
+		"/home/david/python/cxphasing/CXData.py",
+		"/home/david/.config/sublime-text-2/Packages/User/Base File.sublime-settings",
+		"/home/david/python/CXPhasing/CXParams_simulation128.py",
+		"/home/david/python/CXPhasing/CXParams_APSlaptop_sc6.py",
+		"/home/david/python/CXPhasing/CXFileReader.py",
+		"/home/david/python/CXPhasing/CXDb.py",
+		"/home/david/python/various/test_scipy_weave_inline.py",
+		"/home/david/python/various/test_scipy_weave_inline_old.py",
+		"/home/david/python/mpp/phasingparams_mmpad_sc6.py",
+		"/home/david/python/CXPhasing/CXParams_simulation.py",
+		"/home/david/python/xftomo/xftomo.py",
+		"/home/david/python/CXPhasing/init_cxdb.sql",
+		"/home/david/python/CXPhasing/init_CXPhasing_mysql_root.py",
+		"/home/david/python/CXPhasing/CXLog.py",
+		"/home/david/Ubuntu One/EpicsArchiver-1.2.1/pvarch_init.sql",
+		"/home/david/python/CXPhasing/CXParams_APSlaptop_sc4.py",
+		"/home/david/python/various/test_phase_correlation.py",
+		"/home/david/python/xftomo/xftomo_Gleber.py",
+		"/home/david/python/xftomo/radon_transform.py",
+		"/home/david/Ubuntu One/python/xftomo/xftomo.py",
+		"/home/david/python/CXPhasing/CXParams_sc4.py",
+		"/home/david/python/CXPhasing/CXParams1.py",
+		"/home/david/Ubuntu One/EpicsArchiver-1.2.1/init_pvarch",
+		"/home/david/Ubuntu One/EpicsArchiver-1.2.1/lib/SimpleDB.py",
+		"/home/david/Ubuntu One/EpicsArchiver-1.2.1/lib/util.py",
+		"/home/david/Ubuntu One/EpicsArchiver-1.2.1/lib/MasterDB.py",
+		"/home/david/Ubuntu One/EpicsArchiver-1.2.1/lib/Cache.py",
+		"/home/david/Ubuntu One/EpicsArchiver-1.2.1/lib/Scan.py",
+		"/home/david/Ubuntu One/mpp_clone/phasingparams_mmpad_au_test_pattern.py",
+		"/home/david/Ubuntu One/mpp_clone/phasingparams_mmpad_sc6.py",
+		"/home/david/Ubuntu One/mpp_clone/sxdm_data_prep_mmpad.py",
+		"/home/david/python/CXPhasing/mmpad_image.py",
+		"/home/david/Ubuntu One/mpp_clone/Params.py",
+		"/home/david/python/CXPhasing/CXDb_old.py",
+		"/home/david/python/CXPhasing/init_cxp_mysql.py",
+		"/home/david/Ubuntu One/EpicsArchiver-1.2.1/scans_init.sql",
+		"/home/david/Ubuntu One/EpicsArchiver-1.2.1/config.py",
+		"/home/david/Ubuntu One/mpp_clone/sxdm_python_sxdm.py",
+		"/home/david/python/CXPhasing/round_scan.py",
+		"/home/david/Ubuntu One/mpp_clone/phasingparams_au_test_pattern_2.py",
+		"/home/david/python/CXPhasing/test_CXData.py",
+		"/home/david/python/CXPhasing/multiprocessing_class_test.py"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"probe/(i+1)]",
+			"init_probe",
+			"npz",
+			"update_fi",
+			"save",
+			"treat_beamstop",
+			"self.log",
+			"psi_modes",
+			"mode_s",
+			"save",
+			"probe_mode",
+			"epi",
+			"update",
+			"epie",
+			"selec",
+			"log_reconstruction_parameters",
+			"__se",
+			"dm",
+			"dx_s",
+			"simula",
+			"treat_beamstop",
+			"reconstit",
+			"read_pickle",
+			"%",
+			"image_to_png",
+			"save_fig",
+			"1Scan",
+			"simulate_data",
+			"sp",
+			"cpt",
+			"in_thre",
+			"onload",
+			"get_valid_dets",
+			"drop_rows",
+			"get_full",
+			"image_to",
+			"crow",
+			"fix_gpfile",
+			"wait_for_pngfile",
+			"gp",
+			"gpo",
+			"full_install",
+			"()))",
+			"which_callback",
+			"add_epics_pvname",
+			"epics_connect",
+			"add_epics_pvname",
+			"which_c",
+			"self.local",
+			"print",
+			"epics_connect",
+			"add_epics_pvname",
+			"select",
+			"get_scan_pvnames",
+			"pdb",
+			"sql_exec_fetch",
+			"config",
+			"cached_data",
+			"add_epics_pvname",
+			"set_scan_value",
+			"nv",
+			"scan_params",
+			"scan1d_NPTS",
+			"cached_data_arrays",
+			"scan_params['scan1d_NPTS']",
+			"add_epic",
+			"update_",
+			"%",
+			"update_dets_connected",
+			"caget",
+			"cached_d",
+			"cached_d				",
+			"line",
+			"starthtml",
+			"jscal_g",
+			"htmlhead",
+			"jscal",
+			"exit",
+			"shutdown",
+			"close",
+			"onchan",
+			"create_emp",
+			"use",
+			"2-ID-B",
+			"get_cac",
+			"coll",
+			"favicon",
+			"lib",
+			"get_scan_p",
+			"pvdat",
+			"hash",
+			"self.M",
+			"M",
+			"reconstruction",
+			"skew",
+			"  ",
+			"self",
+			"self.total",
+			"inplace",
+			"ydim",
+			"log",
+			"set_auto",
+			"sql_ex",
+			")",
+			"self.log",
+			"\\n",
+			"worker",
+			"set_trace",
+			"writeGif",
+			"config",
+			"get_cur",
+			"fftshift",
+			"fftshift		",
+			"pdb.set",
+			"self.processed_filename",
+			"n_cores",
+			"scan_mesh",
+			"                    \n",
+			"beginning",
+			"conj",
+			"fft2",
+			"det_mod_stack",
+			"imag",
+			"real",
+			"ob[",
+			"ob_est",
+			"numpy",
+			"reconstruction"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"CXP.log",
+			"CXPhasing.M",
+			"cs0",
+			"log",
+			"CXP.db",
+			"self.filename",
+			"    "
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "cxphasing/CXPhasing2.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 38720,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								36034,
+								36034
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 14010.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "cxphasing/cxparams/CXParams_v05_sec34Robinson.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 10102,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								7775,
+								7775
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1887.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "cxphasing/CXData2.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 39734,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								26202,
+								26202
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 10935.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 34.0
+	},
+	"input":
+	{
+		"height": 33.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 118.0
+	},
+	"project": "CXPhasing.sublime-project",
+	"replace":
+	{
+		"height": 64.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+			[
+				"",
+				"cxphasing/CXPhasing2.py"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"selected_items":
+		[
+			[
+				"",
+				"/home/david/python/EpicsArchiver/lib/epics_archiver.sublime-project"
+			]
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 221.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

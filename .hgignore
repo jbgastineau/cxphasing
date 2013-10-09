@@ -1,0 +1,9 @@
+# use glob syntax.
+syntax: glob
+
+*.sublime-project
+*.sublime-workspace
+*.pyc
+CXParams.py
+build/*
+dist/*

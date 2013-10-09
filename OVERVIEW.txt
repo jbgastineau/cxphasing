@@ -1,0 +1,104 @@
+CXPhasing Overview
+==================
+
+The phasing algorithm has four main files:
+    1. CXParams
+    2. CXFileReader
+    3. CXData
+    4. CXPhasing
+
+And some supplementary files:
+    5. CXDb
+    6. multiprocess
+    7. mmpad_image
+    8. round_scan
+    9 pad
+
+
+CXData is a standalone class for manipulating data and has many useful tools. CXPhasing contains all of the phase retrieval algorithms but is not standalone.
+
+
+1. CXParams
+===========
+
+Contains all of the phasing parameters broken up into sections. Each section contains only parameters relevant to that section:
+    *'db' - for creating & connecting to the MySQL db
+    *'machine' - about the machine running the reconstructions
+    *'actions' - which actions to perform during the reconstruction attempt
+    *'io' - where to get & store data, write log files
+    *'experiment' - parameters which don't change between measurements i.e one experiment will in general have many measurements
+    *'measurement' - a single dataset can be associated with a single measurement
+    *'preprocessing' - the steps to be applied to the data before beginning phase retrieval
+    *'reconstruction' - parameters which change with reconstruction attempt. One measurement might have many reconstruction attempts
+
+CXParams.py should be a softlink to a CXParams style file which has an arbitrary name and location. The script will always look for a file named CXParams but the softlink can point anywhere.
+
+The measurement.simulate_data flag will cause the script to simulate an experiment with the parameters in the CXParams file.
+
+2. CXFileReader
+===============
+A container for reading in data from some common filetypes.
+
+3. CXData
+=========
+A class for holding and manipulating data. The data are stored as a list in self.data. So for a ptycho dataset each list element would be a separate scan position.
+
+The class supports many common operations transparently like addition, subtraction, multiplication, division, power, log, padding, subpixel shifting (in place and out of place), subpixel array selection and many others.
+
+from CXData import CXData
+lena = CXData()
+lena.load('lena128.npy')
+>> CXPhasing   : INFO     Loading data from:
+    lena128.npy
+
+lena
+>> <<class 'CXData.CXData'> at 0x47a4e50>
+A list of 1 arrays with size 128x128.
+Showing array 0 only:
+array([[137, 135, 136, ...,  89, 139, 136],
+       [134, 132, 134, ...,  96, 101,  73],
+       [132, 129, 132, ...,  72,  29,  16],
+       ..., 
+       [ 29,  30,  34, ...,  31,  27,  33],
+       [ 27,  29,  27, ...,  32,  43,  57],
+       [ 24,  27,  24, ...,  44,  63,  69]], dtype=uint8)
+
+lena.show()
+
+small_lena = lena[12.4:20.4, 10.9:209.9] # non-integer sub array selection
+shift_lena = lena.shift(10.3, 11) # out of place shift
+lena.ishift(10.2, 11.2) # in place shift
+
+The CXData objects also have a property called itype (instance type) which can have the following values:
+    probe
+    object
+    psi
+    positions
+    det_mod
+    probe_det_mod
+    dark
+
+When a CXData object is instantiated with an itype it will trigger operations to get the data that that particular instance is meant to have.
+
+E.g probe=CXData(itype='probe')
+
+Will interrogate the CXParams file for the kind of optic being used (KB or ZP), the focus size, the sample array pixel size and calculate an initial guess at the probe based on that information.
+
+Automated Data Reduction - Filenaming Convention
+========================
+A file naming convention has been adopted to automatically reduce data which has been acquired with:
+    * single or multiple acquisitions per ptycho scan point
+    * single or multiple exposure times per scan point
+
+The naming convention is explained in CXParams and CXData.
+
+
+3. CXPhasing
+============
+
+The phasing algorithm and the file used to begin the phase retrieval process.
+
+Phase retrieval uses DM & ER as specified in CXParams/reconstruction.
+Begin phase retrieval with ./CXPhasing.py or alternately from python terminal: 
+CXPh = CXPhasing()
+CXPhasing.run()
