@@ -376,6 +376,18 @@ class SimpleTable:
                 ks.append(field)
                 vs.append(v)
                 q.append("%s=%s" % (field, v))
+            else: #new field for database
+                if isinstance(v, (int, float)):
+                    v=str(v)
+                elif isinstance(v, bool):
+                    v=str(int(v))
+                elif isinstance(v, (str, list, dict)):
+                    v='"{}"'.format(v)
+                field = clean_input(k.lower())
+                ks.append(field)
+                vs.append(v)
+                q.append("%s=%s" % (field, v))
+
         s1 = ','.join(ks)
         s2 = ','.join(vs)
         s = ','.join(q)

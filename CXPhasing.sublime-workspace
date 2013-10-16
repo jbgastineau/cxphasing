@@ -4,6 +4,10 @@
 		"selected_items":
 		[
 			[
+				"set_",
+				"set_trace"
+			],
+			[
 				"hammi",
 				"hamming_window"
 			],
@@ -510,36 +514,32 @@
 			[
 				"sa",
 				"saturation_level"
-			],
-			[
-				"multip",
-				"multiprocess_this"
 			]
 		]
 	},
 	"buffers":
 	[
 		{
-			"file": "cxphasing/CXPhasing2.py",
+			"file": "cxphasing/CXPhasing.py",
 			"settings":
 			{
-				"buffer_size": 38720,
+				"buffer_size": 46342,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "cxphasing/cxparams/CXParams_v05_sec34Robinson.py",
+			"file": "cxphasing/CXData.py",
 			"settings":
 			{
-				"buffer_size": 10102,
+				"buffer_size": 39757,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "cxphasing/CXData2.py",
+			"file": "cxphasing/cxparams/CXParams.py",
 			"settings":
 			{
-				"buffer_size": 39734,
+				"buffer_size": 9992,
 				"line_ending": "Unix"
 			}
 		}
@@ -615,6 +615,13 @@
 	},
 	"file_history":
 	[
+		"/home/david/python/CXPhasing/cxphasing/multiprocess.py",
+		"/home/david/python/CXPhasing/cxphasing/CXDb.py",
+		"/home/david/python/CXPhasing/cxphasing/cxparams/CXParams_APSlaptop_sc6.py",
+		"/home/david/python/CXPhasing/cxphasing/cxparams/CXParams_v05_sec34Robinson.py",
+		"/home/david/python/CXPhasing/cxphasing/cxparams/CXParams_APSlaptop_sc6_v5.py",
+		"/home/david/python/CXPhasing/cxphasing/CXPhasing2.py",
+		"/home/david/python/CXPhasing/cxphasing/CXData2.py",
 		"/home/david/python/CXPhasing/cxphasing/cxparams/CXParams.py",
 		"/home/david/python/CXPhasing/tests/test_CXModal.py",
 		"/home/david/python/CXPhasing/cxphasing/CXUtils.py",
@@ -628,7 +635,6 @@
 		"/home/david/python/CXPhasing/cxphasing/cxparams/CXParams_APSlaptop_sim128.py",
 		"/home/david/python/CXPhasing/bin/phasing.py",
 		"/home/david/python/CXPhasing/cxphasing/CXParams.py",
-		"/home/david/python/CXPhasing/cxphasing/cxparams/CXParams_APSlaptop_sc6.py",
 		"/home/david/python/CXPhasing/cxphasing/cxparams/CXParams_simulation128.py",
 		"/home/david/python/CXPhasing/cxphasing/CXPhasing.py",
 		"/home/david/python/CXPhasing/MANIFEST~",
@@ -637,9 +643,7 @@
 		"/home/david/python/CXPhasing/cxphasing/vine_utils.py",
 		"/home/david/python/CXPhasing/cxphasing/CXData.py",
 		"/home/david/python/various/cplot.py",
-		"/home/david/python/CXPhasing/cxphasing/multiprocess.py",
 		"/home/david/python/CXPhasing/cxphasing/cxparams/CXParams_simulation256.py",
-		"/home/david/python/CXPhasing/cxphasing/CXDb.py",
 		"/home/david/python/CXPhasing/cxphasing/blind_regularization_estimation.py",
 		"/home/david/python/CXPhasing/CXParams.py",
 		"/home/david/python/CXPhasing/CXData.py",
@@ -738,11 +742,7 @@
 		"/home/david/python/CXPhasing/init_cxp_mysql.py",
 		"/home/david/Ubuntu One/EpicsArchiver-1.2.1/scans_init.sql",
 		"/home/david/Ubuntu One/EpicsArchiver-1.2.1/config.py",
-		"/home/david/Ubuntu One/mpp_clone/sxdm_python_sxdm.py",
-		"/home/david/python/CXPhasing/round_scan.py",
-		"/home/david/Ubuntu One/mpp_clone/phasingparams_au_test_pattern_2.py",
-		"/home/david/python/CXPhasing/test_CXData.py",
-		"/home/david/python/CXPhasing/multiprocessing_class_test.py"
+		"/home/david/Ubuntu One/mpp_clone/sxdm_python_sxdm.py"
 	],
 	"find":
 	{
@@ -761,6 +761,13 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"()\n",
+			"5",
+			"cxphasing2",
+			"ppc",
+			"relaxedM",
+			"choose",
+			"choose_",
 			"probe/(i+1)]",
 			"init_probe",
 			"npz",
@@ -881,14 +888,7 @@
 			"                    \n",
 			"beginning",
 			"conj",
-			"fft2",
-			"det_mod_stack",
-			"imag",
-			"real",
-			"ob[",
-			"ob_est",
-			"numpy",
-			"reconstruction"
+			"fft2"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -896,6 +896,7 @@
 		"regex": false,
 		"replace_history":
 		[
+			"M",
 			"CXP.log",
 			"CXPhasing.M",
 			"cs0",
@@ -918,19 +919,19 @@
 			[
 				{
 					"buffer": 0,
-					"file": "cxphasing/CXPhasing2.py",
+					"file": "cxphasing/CXPhasing.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 38720,
+						"buffer_size": 46342,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								36034,
-								36034
+								17750,
+								17750
 							]
 						],
 						"settings":
@@ -940,26 +941,55 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 14010.0,
+						"translation.y": 6395.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "cxphasing/cxparams/CXParams_v05_sec34Robinson.py",
+					"file": "cxphasing/CXData.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 10102,
+						"buffer_size": 39757,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								7775,
-								7775
+								4473,
+								4473
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2665.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "cxphasing/cxparams/CXParams.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 9992,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								8482,
+								8482
 							]
 						],
 						"settings":
@@ -969,36 +999,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1887.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "cxphasing/CXData2.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 39734,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								26202,
-								26202
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Python/Python.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 10935.0,
+						"translation.y": 3978.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"

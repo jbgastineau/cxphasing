@@ -66,7 +66,7 @@ def worker(func):
         while True:
             job_args = jobs.get()
             if job_args[0] is None:  # Deal with Poison Pill
-                print '{}: Exiting. {:d} jobs completed.'.format(name, jobs_completed)
+                #print '{}: Exiting. {:d} jobs completed.'.format(name, jobs_completed)
                 jobs.task_done()
                 break
 

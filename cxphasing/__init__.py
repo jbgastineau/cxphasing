@@ -3,7 +3,7 @@ __all__ = ["CXData", "CXData2", "CXParams", "CXPhasing", "CXPhasing2", "CXFileRe
 import cxparams
 from cxparams import CXParams
 from CXFileReader import CXFileReader
-from CXData2 import CXData
-from CXData2 import CXModal
-from CXPhasing2 import CXPhasing
+from CXData import CXData
+from CXData import CXModal
+from CXPhasing import CXPhasing
 import CXUtils as CXU

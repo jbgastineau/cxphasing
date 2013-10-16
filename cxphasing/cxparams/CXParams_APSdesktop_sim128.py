@@ -135,7 +135,7 @@ io.darkfield_filename =         ''
 io.darkfield_filename_range =   ''
 io.simulation_sample_filename = ['/home/david/python/lena128.npy',
                                  '/home/david/python/einstein128.npy']
-
+io.initial_probe_guess =        ''
 
 """
 ----------
@@ -233,8 +233,8 @@ Reconstruction
 
 reconstruction.sequence =                               5
 reconstruction.ptycho_its =                             1000
-reconstruction.begin_updating_probe =                   5
-reconstruction.begin_modal_reconstruction =             20
+reconstruction.begin_updating_probe =                   10
+reconstruction.begin_modal_reconstruction =             2000
 reconstruction.algorithm =                              {'er':10, 'dm':1}
 reconstruction.probe_object_its =                       1 # Number of times to update probe and object contiguouslyo'
 reconstruction.verbose =                                True
@@ -242,13 +242,14 @@ reconstruction.flip_mesh_lr =                           False # Reverse ptycho g
 reconstruction.flip_mesh_ud =                           False # Reverse ptycho grid up-down
 reconstruction.flip_fast_axis =                         False # Swap fast axis from vertical to horizontal
 reconstruction.ptycho_subpixel_shift =                  False
-reconstruction.probe_position_correction =              False
-reconstruction.ppc_begin =                              300 # Begin updating after N iterations
+reconstruction.probe_position_correction =              True
+reconstruction.begin_probe_position_correction =        50 # Begin updating after N iterations
 reconstruction.ppc_length =                             100 # Update positions for N iterations
 reconstruction.ppc_trial_positions =                    4
 reconstruction.ppc_search_radius =                      5 # pixels
-reconstruction.initial_position_jitter_radius =         5
-reconstruction.probe_modes =                            2
+reconstruction.initial_position_jitter_radius =         1
+reconstruction.probe_modes =                            1
+reconstruction.calc_chi_squared =                       False
 
 
 
@@ -274,8 +275,8 @@ file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(m
 console_formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
 ch.setFormatter(console_formatter)
 fh.setFormatter(file_formatter)
-#log.addHandler(ch)
-#log.addHandler(fh)
+log.addHandler(ch)
+log.addHandler(fh)
 
 # Derived quanitites
 p = preprocessing.desired_array_shape
