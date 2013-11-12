@@ -1,0 +1,5 @@
+################
+ Introduction 
+################
+
+CXPhasing is a python module for performing ptychographic phase retrieval. It uses the `ePIE algorithm <http://dx.doi.org/10.1016/j.ultramic.2009.05.012>`_

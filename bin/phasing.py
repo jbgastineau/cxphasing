@@ -34,7 +34,7 @@ def set_cxparams(new_params_file):
     return 0
 
 def start_phasing():
-    """ Begin the phasing process (if no phasing process is currently running).
+    """ Begin the phasing process.
 
     :returns: int -- the return code.
     :raises: None
@@ -45,6 +45,9 @@ def start_phasing():
     phasing.preprocessing()
     phasing.phase_retrieval()
     phasing.postprocessing()
+
+    return 0
+
   
 
 def stop_phasing():
@@ -64,6 +67,7 @@ def do_mle():
     """
     phasing = CXPhasing()
     phasing.maximum_likelihood_refinement()
+    return 0
 
 
 def main():

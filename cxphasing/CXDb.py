@@ -28,7 +28,7 @@ def clean_input(x, maxlen=None):
 
 class SimpleDB:
 
-    def __init__(self, user=CXP.db.dbuser, dbname=CXP.db.master_db, passwd=CXP.db.dbpass, host=CXP.db.dbhost,
+    def __init__(self, user=CXP.db.dbuser, dbname=CXP.db.dbname, passwd=CXP.db.dbpass, host=CXP.db.dbhost,
                  autocommit=1):
 
         self.conn = MySQLdb.connect(user=user, db=dbname, passwd=passwd, host=host)
@@ -319,25 +319,13 @@ class SimpleTable:
         except:
             self.db.write('update failed: %s' % q)
 
-    def insert(self,**args):
+    def insert(self, **args):
         "add a new table row "
-        ok = self.check_args(**args)
-        if (ok == 0):
-            self.db.write("Bad argument for insert ")
-            return 0
         q  = []
         for k,v in args.items():
-            if self.fieldtypes.has_key(k):
-                ftype = self.fieldtypes[k]
-                field = clean_input(k.lower())
-                if (v == None): v = ''
-                if isinstance(v,(str,unicode)):
-                    v = safe_string(v)
-                else:
-                    v = str(v)
-                # v =clean_input(v,maxlen=flen)
-                q.append("%s=%s" % (field, v))
+            q.append("%s=%s" % (k, v))
         s = ','.join(q)
+
         qu = "insert into %s set %s" % (self._name, s)
         self.db.execute(qu)
 
@@ -347,46 +335,32 @@ class SimpleTable:
         ks = []
         vs = []
         for k, v in primary.items():
-            if self.fieldtypes.has_key(k.lower()):
-                ftype = self.fieldtypes[k.lower()]
-                field = clean_input(k.lower())
-                if ftype in ['int', 'double']:
-                    v=str(v)
-                elif ftype =='bool':
-                    v=str(int(v))
-                elif ftype == 'str':
-                    v='"{}"'.format(v)
-                elif ftype == 'blob':
-                    v='"{}"'.format(cPickle.dumps(v))
-                ks.append(field)
-                vs.append(v)
+            ftype = type(v)
+            if ftype in ['int', 'double']:
+                v=str(v)
+            elif ftype =='bool':
+                v=str(int(v))
+            elif ftype == 'str':
+                v='"{}"'.format(v)
+            elif ftype == 'blob':
+                v='"{}"'.format(cPickle.dumps(v))
+            ks.append(field)
+            vs.append(v)
 
         for k, v in update.items():
-            if self.fieldtypes.has_key(k.lower()):
-                ftype = self.fieldtypes[k.lower()]
-                field = clean_input(k.lower())
-                if ftype in ['int', 'double']:
-                    v=str(v)
-                elif ftype =='bool':
-                    v=str(int(v))
-                elif ftype == 'str':
-                    v='"{}"'.format(v)
-                elif ftype == 'blob':
-                    v='"{}"'.format(cPickle.dumps(v))
-                ks.append(field)
-                vs.append(v)
-                q.append("%s=%s" % (field, v))
-            else: #new field for database
-                if isinstance(v, (int, float)):
-                    v=str(v)
-                elif isinstance(v, bool):
-                    v=str(int(v))
-                elif isinstance(v, (str, list, dict)):
-                    v='"{}"'.format(v)
-                field = clean_input(k.lower())
-                ks.append(field)
-                vs.append(v)
-                q.append("%s=%s" % (field, v))
+            ftype = self.fieldtypes[k.lower()]
+            field = clean_input(k.lower())
+            if ftype in ['int', 'double']:
+                v=str(v)
+            elif ftype =='bool':
+                v=str(int(v))
+            elif ftype == 'str':
+                v='"{}"'.format(v)
+            elif ftype == 'blob':
+                v='"{}"'.format(cPickle.dumps(v))
+            ks.append(field)
+            vs.append(v)
+            q.append("%s=%s" % (field, v))
 
         s1 = ','.join(ks)
         s2 = ','.join(vs)
@@ -396,12 +370,20 @@ class SimpleTable:
 
         self.db.execute(qu)
 
-    def get_new_recon_id(self):
+    def get_next_id(self, name='unknown'):
         """
         Get a unique id for the current reconstruction attempt.
         """
-        q= "select max(id) as id from slow_params"
-        return int(self.db.exec_fetchone(q)['id'])+1
+        q = 'insert into recon_id (location) values ("{:s}")'
+        self.db.sql_exec(q.format(name, time.time()))
+
+        q= "select max(id) as id from recon_id"
+        rid = self.db.exec_fetchone(q)['id']
+
+        if rid is not None:
+            return int(rid)
+        else:
+            return 1
 
     def db_insert(self):
         def db_insert_decorator(func):

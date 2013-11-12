@@ -14,7 +14,6 @@ setup(
     requires=[
         "numpy (>=1.7)",
         "scipy",
-        "pad",
         "pylab",
         "Image",
         "h5py",

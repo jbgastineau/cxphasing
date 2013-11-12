@@ -7,7 +7,7 @@ from mmpad_image import open_mmpad_tif
 import numpy as np
 import scipy as sp
 import sys
-import libtiff
+#import libtiff
 
 from cxparams import CXParams as CXP
 
@@ -70,7 +70,7 @@ class CXFileReader(object):
                         'jpg': self.read_image,
                         'jpeg': self.read_image,
                         'png': self.read_image,
-                        'tif': self.read_tif,
+                        'tif': self.read_image,
                         'tiff': self.read_tif,
                         'npy':  self.read_npy,
                         'npz':  self.read_npz,
@@ -104,12 +104,18 @@ class CXFileReader(object):
             CXP.log.error('Could not extract array from mda file')
             raise
 
-    def read_h5(self, filename=None):
+    def read_h5(self, filename=None, h5_file_path='/entry/instrument/detector/data'):
 
         if not filename:
             filename = self.filename
+
         try:
-            return h5py.File(filename)[self.h5_file_path].value
+            h5_file_path = self.h5_file_path
+        except:
+            pass
+
+        try:
+            return h5py.File(filename)[h5_file_path].value
         except:
             CXP.log.error('Could not extract data from h5 file.')
             raise

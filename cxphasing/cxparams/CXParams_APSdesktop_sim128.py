@@ -31,7 +31,8 @@ db =              param_store('db')
 machine =         param_store('machine')
 actions =         param_store('actions')
 io =              param_store('io')
-experiment =      param_store('experiment') 
+experiment =      param_store('experiment')
+simulation =      param_store('simulation') 
 measurement =     param_store('measurement')
 preprocessing =   param_store('preprocessing')
 reconstruction =  param_store('reconstruction')
@@ -136,6 +137,7 @@ io.darkfield_filename_range =   ''
 io.simulation_sample_filename = ['/home/david/python/lena128.npy',
                                  '/home/david/python/einstein128.npy']
 io.initial_probe_guess =        ''
+io.data_exchange_filename =     './{:s}.h5'.format(io.scan_id)
 
 """
 ----------
@@ -156,6 +158,20 @@ experiment.px =            128
 experiment.py =            128
 experiment.z =             1.0
 experiment.optic =         ['ZP', 'KB'][0]
+
+"""
+Simulation
+
+Parameters for simulating data.
+
+"""
+simulation.noise_model =            ['poisson', 'gaussian']
+simulation.gaussian_noise_level =   0.01
+simulation.total_photons =          1e9
+simulation.beam_stop =              False
+simulation.beam_stop_size =         30 #pixels
+simulation.beam_stop_attenuation =  1e-3
+simulation.defocus =                1e-3
 
 """
 Measurement
@@ -231,24 +247,24 @@ preprocessing.calc_stxm_image =          True
 Reconstruction 
 """
 
-reconstruction.sequence =                               5
+reconstruction.sequence =                               6
 reconstruction.ptycho_its =                             1000
 reconstruction.begin_updating_probe =                   10
-reconstruction.begin_modal_reconstruction =             2000
-reconstruction.algorithm =                              {'er':10, 'dm':1}
+reconstruction.begin_modal_reconstruction =             50
+reconstruction.algorithm =                              {'er':1000, 'dm':1}
 reconstruction.probe_object_its =                       1 # Number of times to update probe and object contiguouslyo'
 reconstruction.verbose =                                True
 reconstruction.flip_mesh_lr =                           False # Reverse ptycho grid left-right
 reconstruction.flip_mesh_ud =                           False # Reverse ptycho grid up-down
 reconstruction.flip_fast_axis =                         False # Swap fast axis from vertical to horizontal
 reconstruction.ptycho_subpixel_shift =                  False
-reconstruction.probe_position_correction =              True
-reconstruction.begin_probe_position_correction =        50 # Begin updating after N iterations
+reconstruction.probe_position_correction =              False
+reconstruction.begin_probe_position_correction =        100 # Begin updating after N iterations
 reconstruction.ppc_length =                             100 # Update positions for N iterations
 reconstruction.ppc_trial_positions =                    4
-reconstruction.ppc_search_radius =                      5 # pixels
-reconstruction.initial_position_jitter_radius =         1
-reconstruction.probe_modes =                            1
+reconstruction.ppc_search_radius =                      11 # pixels
+reconstruction.initial_position_jitter_radius =         10
+reconstruction.probe_modes =                            3
 reconstruction.calc_chi_squared =                       False
 
 

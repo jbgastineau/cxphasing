@@ -11,11 +11,12 @@
 import os
 import numpy as np
 import scipy as sp
+from scipy.stats import poisson
 import pylab
 import time
 import math
 import pdb
-from numpy.random import uniform
+from numpy.random import uniform, choice, normal
 import multiprocessing as mp
 import itertools
 import shutil
@@ -29,18 +30,23 @@ from CXUtils import worker, object_worker, split_seq, v_hls_to_rgb, energy_to_wa
 import multiprocess
 
 from matplotlib import cm
+from matplotlib import rc
 from matplotlib.patches import Circle
 from matplotlib.collections import PatchCollection
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
+from matplotlib.colorbar import Colorbar
 
 try:
     import MySQLdb
     hasmysql = True
 except:
     hasmysql = False
+
+hasmysql*=CXP.db.usemysql
 
 class CXPhasing(object):
     """
@@ -50,14 +56,6 @@ class CXPhasing(object):
 
         :attr annealing_schedule: Annealing schedule for probe position correction
         :type annealing_schedule: lambda function
-        :attr dict slow_db_queue: 
-            Values to be entered into the slow (once per reconstruction attempt) database.
-               Entry syntax:
-               slow_db_queue[db_field] = (value, )
-        :attr dict fast_db_queue: 
-            Values to be entered into the fast (once per iteration per reconstruction attempt) database.
-            Entry syntax:
-                fast_db_queue[db_field] = (iter, value)
         :attr int p: side length of state vector array in pixels
         :attr int p2: half side length of state vector array in pixels
         :attr int ob_p: side length of object array in pixels
@@ -86,23 +84,21 @@ class CXPhasing(object):
         self.ppc = False
 
         # MySQL DB Integration
+        self.db_queue = {}
         if hasmysql:
-            self.init_db_conn()
-        # Values are inserted into the db by adding them to the queue
-        # The queues are emptied once per iteration
-        # The slow database has one entry per reconstruction attempt
-        # The fast database has one entry per iteration per reconstruction attempt
-        # Entry syntax:
-        #   slow_db_queue[db_field] = (value, )
-        #   fast_db_queue[db_field] = (iter, value)
-        self.slow_db_queue = {}
-        self.fast_db_queue = {}
+            self.init_db_conn()        
 
         self.p = CXP.p
         self.p2 = self.p / 2
         self.ob_p = CXP.preprocessing.object_array_shape
         self.total_its = 0
         self.probe_modes = CXP.reconstruction.probe_modes
+
+        self.mask = CXData(data=sp.ones((self.p, self.p)))
+        self.mask.data[0][0,:] = 0.
+        self.mask.data[0][-1,:] = 0.
+        self.mask.data[0][:,0] = 0.
+        self.mask.data[0][:,-1] = 0.
 
         self.algorithm = 'er' # Start with error reduction
 
@@ -165,11 +161,6 @@ class CXPhasing(object):
         self.probe_intensity = CXData(name='probe_intensity', data=[sp.zeros((self.p, self.p))])
 
         self.probe = CXModal(modes=[])
-        self.psi = CXModal(modes=[])
-
-        for i in range(CXP.reconstruction.probe_modes):
-            self.probe.modes.append(CXData(name='probe{:d}'.format(i), data=[sp.zeros((self.p, self.p), complex)]))
-            self.psi.modes.append(CXData(name='psi{:d}'.format(i), data=[sp.zeros((self.p, self.p), complex) for i in xrange(self.det_mod.len())]))
     
         self.init_probe()
 
@@ -187,9 +178,7 @@ class CXPhasing(object):
 
         """ 
         its = CXP.reconstruction.ptycho_its
-        
-        if hasmysql:
-            self.update_slow_table()
+
         beginning = time.time()
         
         for self.itnum in xrange(its):
@@ -201,8 +190,8 @@ class CXPhasing(object):
 
             now = time.time()
             if hasmysql:
-                self.fast_db_queue['iter_time'] = (self.itnum, now - then)
-                self.fast_db_queue['iter_time_pptpxit'] = (self.itnum, 1e6*(now - then) / (self.positions.total * self.p**2 * (self.itnum + 1)))
+                self.db_queue['iter_time'] = (self.itnum, now - then)
+                self.db_queue['iter_time_pptpxit'] = (self.itnum, 1e6*(now - then) / (self.positions.total * self.p**2 * (self.itnum + 1)))
             CXP.log.info('{:2.2f} seconds elapsed during iteration {:d} [{:1.2e} sec/pt/pix/it]'.format(now - then, self.itnum + 1,
                             (now-then)/(self.positions.total * self.p**2 * (self.itnum + 1))))
             CXP.log.info('{:5.2f} seconds have elapsed in {:d} iterations [{:2.2f} sec/it]'.format(now-beginning, self.itnum + 1, (now-beginning)/(self.total_its + 1)))
@@ -210,7 +199,10 @@ class CXPhasing(object):
                 self.calc_mse()
             self.total_its += 1
             if hasmysql:
-                self.update_fast_table()
+                self.update_recon_param_table()
+                if self.total_its%10:
+                    # Plot from db every 10th iteration
+                    self.db_plot()
             if self.itnum > 0:
                 self.update_figure(self.itnum)
 
@@ -221,19 +213,20 @@ class CXPhasing(object):
         """
         pass
 
-    def simulate_data(self):
+    def simulate_data(self, no_save=False):
         CXP.log.info('Simulating diffraction patterns.')
         self.sample = CXData()
         self.sample.load(CXP.io.simulation_sample_filename[0])
         self.sample.data[0] = self.sample.data[0].astype(float)
         self.sample.normalise(val=0.8)
-        self.sample.data[0]+=0.2
+        delta_T = CXP.simulation.sample_transmission[1]-CXP.simulation.sample_transmission[0]
+        self.sample.data[0]+=CXP.simulation.sample_transmission[0]
         self.input_probe = CXModal()
         if len(CXP.io.simulation_sample_filename)>1:
             ph = CXData()
             ph.load(CXP.io.simulation_sample_filename[1])
             ph.data[0] = ph.data[0].astype(float)
-            ph.normalise(val=np.pi/3)
+            ph.normalise(val=CXP.simulation.sample_phase_shift)
             self.sample.data[0] = self.sample.data[0]*exp(complex(0., 1.)*ph.data[0])
         p = self.sample.data[0].shape[0]
         ham_window = sp.hamming(p)[:,np.newaxis]*sp.hamming(p)[np.newaxis,:]
@@ -253,15 +246,17 @@ class CXPhasing(object):
         for mode in range(CXP.reconstruction.probe_modes):
             if mode==0:
                 new_mode = [1,1]
+                mode_amp = 1.0
             else:
                 new_mode = list(mode_generator())
                 while new_mode in used_modes:
                     new_mode = list(mode_generator())
+                mode_amp = (10*mode)**-1.
             used_modes.append(new_mode)
             CXP.log.info('Simulating mode {:d}: [{:d}, {:d}]'.format(mode, int(new_mode[0]), int(new_mode[1])))
             ph_func = gauss_smooth(np.random.random((p,p)), 10)
             self.input_probe.modes.append(CXData(name='probe{:d}'.format(mode), 
-                data=ortho_modes(new_mode[0], new_mode[1])*exp(complex(0.,np.pi)*ph_func/ph_func.max())))
+                data=mode_amp*ortho_modes(new_mode[0], new_mode[1])*exp(complex(0.,np.pi)*ph_func/ph_func.max())))
         
         self.input_probe.normalise()
         self.input_probe.orthogonalise()
@@ -281,7 +276,24 @@ class CXPhasing(object):
 
         # Add modes incoherently
         self.det_mod = CXModal.modal_sum(abs(fft2(self.input_psi)))
-        self.det_mod.save(path=CXP.io.base_dir+'/'+CXP.io.scan_id+'/raw_data/{:s}.npy'.format('det_mod'))
+        # Add noise
+        if CXP.simulation.noise_model == 'poisson':
+            for i in range(self.positions.total):
+                self.det_mod.data[i] = poisson.rvs(self.det_mod.data[i])
+        elif CXP.simulation.noise_model == 'gaussian':
+            for i in range(self.positions.total):
+                self.det_mod.data[i]+=self.det_mod.data[i]*CXP.simulation.gaussian_noise_level*normal(size=(CXP.p, CXP.p))
+        
+
+        # Limit total counts
+        if CXP.simulation.total_photons<0:
+            for i in range(self.positions.total):
+                self.det_mod.data[i] -= self.det_mod.data[i].min()
+                self.det_mod.data[i] *= sp.floor(CXP.simulate_data.total_photons/sp.sum(self.det_mod.data[i]))
+                deficit = CXP.simulation.total_photons-sp.sum(self.det_mod.data[i])
+
+        if not no_save:
+            self.det_mod.save(path=CXP.io.base_dir+'/'+CXP.io.scan_id+'/raw_data/{:s}.npy'.format('det_mod'))
 
     def pos_correction_transform(self, i):
         # Generates trial position
@@ -342,74 +354,66 @@ class CXPhasing(object):
         if isinstance(psi, CXData):
             return ifft2(det_mod * exp(complex(0., 1.) * angle(fft2(psi))))
         elif isinstance(psi, CXModal):
-            mode_sum = CXModal.modal_sum(abs(fft2(psi))**2.0)**0.5
-            return ifft2((fft2(psi)/(mode_sum))*det_mod)
+            if len(psi)==1:
+                return ifft2(det_mod * exp(complex(0., 1.) * angle(fft2(psi[0]))))
+            else:
+                mode_sum = CXModal.modal_sum(abs(fft2(psi))**2.0)**0.5
+                return ifft2((fft2(psi)/(mode_sum))*det_mod)
 
     def ePIE(self):
-        """.. method:: initial_update_state_vector(self)
+        """.. method:: ePIE(self)
 
             This method uses ePie to generate the initial estimate for psi and object.
 
         """
-
+        
         d1, d2 = self.positions.data
-        for i in xrange(self.positions.total):
+        positions = range(self.positions.total)
+        self.av_chisq = 0
 
-            if i % np.floor(self.positions.total / 10) == 0 and CXP.reconstruction.verbose:
-                CXP.log.info(self.epie_repr.format(self.algorithm_name, self.itnum, i, 100. * float(i + 1) / self.positions.total))
+        for it in xrange(self.positions.total):
 
-            # Non-modal reconstruction
-            if self.total_its<CXP.reconstruction.begin_modal_reconstruction: 
+            # Randomise analysis positions
+            i = choice(positions)
+            positions.remove(i)
 
-                if self.itnum+i==0:
-                    view=self.probe[0][0].copy()
-                else:
-                    view = self.probe[0][0] * self.object[d1[i] - self.p2:d1[i] + self.p2, d2[i] - self.p2:d2[i] + self.p2]
-
-                if self.ppc:
-
-                    error0 = np.sqrt(sp.sum(((abs(fft2(view))-self.det_mod[i])**2.0).data[0]))
-                    
-                    ppc_dict = {}
-                    
-                    multip = multiprocess.multiprocess(self.epie_worker)
-                    
-                    for trial in range(CXP.reconstruction.ppc_trial_positions):
-                        cx, cy = self.pos_correction_transform(i)
-                        ppc_dict[trial] = (cx, cy)
-                        multip.add_job((trial, self.probe[0][0] * self.object[cx - self.p2:cx + self.p2, cy - self.p2:cy + self.p2], self.det_mod[i]))
-                    
-                    results = multip.close_out()
-                    
-                    for result in results:
-                        trial, error = result
-                        if error < error0:
-                            print i, error
-                            error0 = error
-                            self.positions.data[0][i], self.positions.data[1][i] = ppc_dict[trial]
-                            view = self.probe[0][0] * self.object[d1[i] - self.p2:d1[i] + self.p2, d2[i] - self.p2:d2[i] + self.p2]
-
-                if self.algorithm == 'er':
-                    self.psi[0][i] = self.M(view.copy(), self.det_mod[i])
-                elif self.algorithm == 'dm':
-                    self.psi[0][i] += self.M(2*view-self.psi[0][i], self.det_mod[i]) - view
-                    
-                self.update_object(i, view, self.psi[0][i])
-                if self.do_update_probe:
-                    self.update_probe_nonmodal(i, view, self.psi[0][i])
+            if it % np.floor(self.positions.total / 10) == 0 and CXP.reconstruction.verbose:
+                CXP.log.info(self.epie_repr.format(self.algorithm_name, self.itnum, it, 100. * float(it + 1) / self.positions.total))
+             
+            view = self.probe * self.object[d1[i] - self.p2:d1[i] + self.p2, d2[i] - self.p2:d2[i] + self.p2]
+            view_old = view.copy()
             
-            else: # Do modal reconstruction 
-                view = self.probe * self.object[d1[i] - self.p2:d1[i] + self.p2, d2[i] - self.p2:d2[i] + self.p2]
+            if self.ppc:
+                
+                error0 = (sp.sum((abs(CXModal.modal_sum(abs(fft2(view))) - self.det_mod[i]) ** 2.).data[0]) / sp.sum(self.det_mod.data[i] ** 2.))**0.5
+                
+                ppc_dict = {}
+                
+                multip = multiprocess.multiprocess(self.epie_worker)
+                
+                for trial in range(CXP.reconstruction.ppc_trial_positions):
+                    cx, cy = self.pos_correction_transform(i)
+                    ppc_dict[trial] = (cx, cy)
+                    multip.add_job((trial, self.probe * self.object[cx - self.p2:cx + self.p2, cy - self.p2:cy + self.p2], self.det_mod[i]))
+                
+                results = multip.close_out()
+                
+                for result in results:
+                    trial, error = result
+                    if error < error0:
+                        error0 = error
+                        self.positions.data[0][i], self.positions.data[1][i] = ppc_dict[trial]
+                        view = self.probe * self.object[d1[i] - self.p2:d1[i] + self.p2, d2[i] - self.p2:d2[i] + self.p2]
+                        view_old = view.copy()
 
-                if self.algorithm == 'er':
-                    self.psi.setat(i, self.M(view, self.det_mod[i]))
-                    
-                elif self.algorithm == 'dm':
-                    self.psi.setat(i, self.psi.getat(i)+self.M(2*view-self.psi, self.det_mod[i]) - view)
-
-                self.update_object(i, view, self.psi.getat(i))
-                if self.do_update_probe:
-                    self.update_probe(i, view, self.psi.getat(i))
+            if self.algorithm == 'er':
+                view= self.M(view, self.det_mod[i])
+            elif self.algorithm == 'dm':
+                view += self.M(2*view-self.M(view, self.det_mod[i]), self.det_mod[i]) - view
+                
+            self.update_object(i, view_old, view)
+            if self.do_update_probe:
+                self.update_probe(i, view_old, view)
         
         if self.do_update_probe:
             self.probe.normalise()
@@ -418,12 +422,15 @@ class CXPhasing(object):
             probe.save(path=self._cur_sequence_dir+'/probe_mode{:d}.npy'.format(mode))
         self.object.save(path=self._cur_sequence_dir+'/object.npy')
 
+        self.av_chisq /= self.positions.total
+        self.db_queue['chisq'] = (self.itnum, self.av_chisq)
+
     @staticmethod
     @multiprocess.worker
     def epie_worker(args):
         trial, view, det_mod = args
 
-        error =  np.sqrt(sp.sum(((abs(fft2(view))-det_mod)**2.0).data[0]))
+        error =  (sp.sum((abs(CXModal.modal_sum(abs(fft2(view))) - det_mod) ** 2.).data[0]) / sp.sum(det_mod.data[0] ** 2.))**0.5
         
         return (trial, error)
 
@@ -432,7 +439,6 @@ class CXPhasing(object):
         Update the object from a single ptycho position.
 
         """
-        then=time.time()
         d1, d2 = self.positions.data
         id1, id2 = d1//1, d2//1
         probe_intensity_max = CXModal.modal_sum(abs(self.probe)**2.0).data[0].max()
@@ -444,22 +450,12 @@ class CXPhasing(object):
         if self.total_its==0 and sp.mod(i, len(self.positions.data[0]) / 10) == 0:
             self.update_figure(i)
 
-    def update_probe_nonmodal(self, i, psi_old, psi_new):
-        
-        d1, d2 = self.positions.data
-        id1, id2 = d1//1, d2//1
-        object_intensity_max = (abs(self.object)**2.0).data[0].max()
-
-        self.probe.modes[0] += \
-            CXData.shift(conj(self.object[id1[i] - self.p2:id1[i] + self.p2, id2[i] - self.p2:id2[i] + self.p2]) * 
-                        (psi_new-psi_old)[0] / object_intensity_max, d1[i]%1, d2[i]%1)
-
     def update_probe(self, i, psi_old, psi_new):
         
         d1, d2 = self.positions.data
         id1, id2 = d1//1, d2//1
         object_intensity_max = (abs(self.object)**2.0).data[0].max()
-
+         
         for mode in range(len(self.probe)):
             self.probe.modes[mode] += \
                 CXData.shift(conj(self.object[id1[i] - self.p2:id1[i] + self.p2, id2[i] - self.p2:id2[i] + self.p2]) *
@@ -483,8 +479,10 @@ class CXPhasing(object):
     def select_algorithm(self):
         try:
             self.algorithm_count
+            self.ppc_count
         except AttributeError:
             self.algorithm_count = 0
+            self.ppc_count = 0
 
         if self.algorithm == 'er':
             if self.algorithm_count>=CXP.reconstruction.algorithm['er']:
@@ -511,17 +509,51 @@ class CXPhasing(object):
             self.do_update_probe=False
 
         if (CXP.reconstruction.probe_position_correction and 
-            self.total_its>CXP.reconstruction.begin_probe_position_correction):
+            self.total_its>CXP.reconstruction.begin_probe_position_correction and
+            self.ppc_count==0):
             self.ppc = True
+            self.do_update_probe = False
+
+        if self.ppc_count==1 and self.total_its>CXP.reconstruction.begin_updating_probe:
+            self.do_update_probe = True
+
+        self.ppc_count += 1
+        if self.ppc_count>=5:
+            self.ppc_count = 0
+
+
+        if self.total_its==CXP.reconstruction.begin_modal_reconstruction:
+            for m in range(CXP.reconstruction.probe_modes-1):
+                self.probe.modes.append(CXData(data=0.05*self.probe.modes[0].data[0]))
+                self.probe.orthogonalise()
 
         self.algorithm_count += 1
-        self.fast_db_queue['algorithm'] = (self.itnum, self.algorithm)
+        self.db_queue['algorithm'] = (self.itnum, self.algorithm)
 
     def init_figure(self):
         pylab.ion()
-        self.f1=pylab.figure(1, figsize=(12, 10))
-        thismanager = pylab.get_current_fig_manager()
-        thismanager.window.wm_geometry("+600+0")
+
+        rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+        rc('text', usetex=True)
+
+        fig_width_pt  = 750 # Figure width in points
+
+        inches_per_pt = 1.0 / 72.27
+        golden_ratio  = (np.sqrt(5) - 1.0) / 2.0  # because it looks good
+
+        fig_width_in  = fig_width_pt * inches_per_pt  # figure width in inches
+        fig_height_in = fig_width_in * golden_ratio   # figure height in inches
+        fig_dims      = [fig_width_in, fig_height_in] # fig dims as a list
+
+        self.fig = plt.figure(0, figsize = fig_dims)
+        self.fig.canvas.set_window_title('CXPhasing: Ptychographic Phase Retrieval')
+
+        try:
+            thismanager = pylab.get_current_fig_manager()
+            thismanager.window.wm_geometry("+600+0")
+        except:
+            pass
+
         try:
             itnum = self.itnum
         except AttributeError:
@@ -530,13 +562,53 @@ class CXPhasing(object):
             mse = self.av_mse
         except AttributeError:
             mse = -1.0
-        pylab.suptitle('Sequence: {:d}, Iteration: {:d}, MSE: {:3.2f}%'.format(CXP.reconstruction.sequence, itnum, 100*mse))
+        try:
+            self.algorithm
+        except AttributeError:
+            self.algorithm = 'er'
+
+        plt.suptitle('Scan: {:s}, Sequence: {:d}, Iteration: {:d}, MSE: {:3.2f}%, Algorithm: {:s}'.format(
+            CXP.io.scan_id, CXP.reconstruction.sequence, itnum, 100*mse, self.algorithm))
+
+        self.gs0 = gridspec.GridSpec(2,1)
+        self.gs0.update(left=0.02, right=0.98, top=0.9, bottom=0.05, hspace=0.25)
+        self.gs00 = gridspec.GridSpecFromSubplotSpec(60, 3, subplot_spec=self.gs0[0], hspace=0.0, wspace=0.1)
+        self.gs01 = gridspec.GridSpecFromSubplotSpec(60, 12, subplot_spec=self.gs0[1], hspace=0.1, wspace=0.0)
+
+        self.axes_group1 = []
+        self.axes_group1.append(plt.Subplot(self.fig, self.gs00[0:58, 0])) #Image 1
+        self.axes_group1.append(plt.Subplot(self.fig, self.gs00[58:59, 0])) #Colorbar 1
+        self.axes_group1.append(plt.Subplot(self.fig, self.gs00[0:58, 1])) #Image 2
+        self.axes_group1.append(plt.Subplot(self.fig, self.gs00[58:59, 1])) #Colorbar2
+        self.axes_group1.append(plt.Subplot(self.fig, self.gs00[0:58, 2])) #Image 3
+        self.axes_group1.append(plt.Subplot(self.fig, self.gs00[58:59, 2])) #Colorbar3
+
+        [self.fig.add_subplot(ax) for ax in self.axes_group1]
+
+        self.axes_group2 = []
+        self.axes_group2.append(plt.Subplot(self.fig, self.gs01[58:59, 4:8])) # Colorbar
+        if CXP.reconstruction.probe_modes==1:
+            groups = [(0, 58, 0, 12)]
+        elif CXP.reconstruction.probe_modes==2:
+            groups = [(0, 58, 0, 6), (0, 58, 6, 12)]
+        elif CXP.reconstruction.probe_modes==3:
+            groups = [(0, 58, 0, 4), (0, 58, 4, 8), (0, 58, 8, 12)]
+        elif CXP.reconstruction.probe_modes==4:
+            groups = [(0, 58, 0, 3), (0, 58, 3, 6), (0, 58, 6, 9), (0, 58, 9, 12)]
+        else:
+            groups = [(0, 30, 0, 4),   (0, 30, 4, 8),  (0, 30, 8, 12),
+                     (30, 58, 0, 4),  (30, 58, 4, 8), (30, 58, 8, 12)]
+
+        for gr in groups:
+            self.axes_group2.append(plt.Subplot(self.fig, self.gs01[gr[0]:gr[1], gr[2]:gr[3]])) #Image 1
+
+        [self.fig.add_subplot(ax) for ax in self.axes_group2]
 
 
     def update_figure(self, i=0):
-        cur_cmap = cm.RdGy_r
-        self.f1.clf()
-        self.init_figure()
+
+        [ax.cla() for ax in self.axes_group1]
+        [ax.cla() for ax in self.axes_group2]
 
         wh = sp.where(abs(self.object.data[0]) > 0.1 * (abs(self.object.data[0]).max()))
         try:
@@ -547,48 +619,65 @@ class CXPhasing(object):
             y1, y2 = 0, self.ob_p
 
         # Plot magnitude of object
-        s1 = pylab.subplot(231)
-        s1_im = s1.imshow(abs(self.object).data[0][x1:x2, y1:y2], cmap=cm.Greys_r)
-        s1.set_title('|object|')
-        plt.axis('off')
-        pylab.colorbar(s1_im)
+        g1im1 = self.axes_group1[0].matshow(abs(self.object).data[0][x1:x2, y1:y2], cmap=cm.Greys_r)
+        self.axes_group1[0].yaxis.set_major_locator(MaxNLocator(4))
+        self.axes_group1[0].xaxis.set_major_locator(MaxNLocator(4))
+        self.axes_group1[0].set_title(r'$|O|$')
+        g1cb1 = Colorbar(ax = self.axes_group1[1], mappable = g1im1, orientation='horizontal')
+        self.axes_group1[1].xaxis.set_major_locator(MaxNLocator(4))
 
         # Plot phase of object
-        s2 = pylab.subplot(232)
-        s2_im = s2.imshow(sp.angle(self.object.data[0][x1:x2, y1:y2]), cmap=cm.hsv)
-        s2.set_title('phase(object)')
-        plt.axis('off')
-        pylab.colorbar(s2_im)
+        g1im2 = self.axes_group1[2].matshow(sp.angle(self.object.data[0][x1:x2, y1:y2]), cmap=cm.hsv)
+        self.axes_group1[2].yaxis.set_major_locator(MaxNLocator(4))
+        self.axes_group1[2].xaxis.set_major_locator(MaxNLocator(4))
+        self.axes_group1[2].set_title(r'$-i\ln O$')
+        g1cb2 = Colorbar(ax = self.axes_group1[3], mappable = g1im2, orientation='horizontal')
 
         # Complex HSV plot of object
-        s3 = pylab.subplot(233)
         h = ((angle(self.object).data[0][x1:x2, y1:y2] + np.pi) / (2*np.pi)) % 1.0
         s = np.ones_like(h)
         l = abs(self.object).data[0][x1:x2, y1:y2]
         l-=l.min()
         l/=l.max()
-        s3_im = s3.imshow(np.dstack(v_hls_to_rgb(h,l,s)))
-        s3.set_title('Complex plot of Object')
-        plt.axis('off')
-
+        g1im3 = self.axes_group1[4].imshow(np.dstack(v_hls_to_rgb(h,l,s)))
+        self.axes_group1[4].yaxis.set_major_locator(MaxNLocator(4))
+        self.axes_group1[4].xaxis.set_major_locator(MaxNLocator(4))
+        self.axes_group1[4].set_title(r'O')
+        g1cb3 = Colorbar(ax = self.axes_group1[5], mappable = g1im3, orientation='horizontal')
+        
         # Plot probe mode 0
-        s4 = pylab.subplot(234)
-        s4_im = s4.imshow(abs(self.probe.modes[0].data[0]), cmap=cur_cmap)
-        s4.set_title('|probe0|')
-        plt.axis('off')
-        pylab.colorbar(s4_im)
+        h = ((angle(self.probe[0]).data[0] + np.pi) / (2*np.pi)) % 1.0
+        s = np.ones_like(h)
+        l = abs(self.probe[0]).data[0]
+        l-=l.min()
+        l/=l.max()
+        g2im1 = self.axes_group2[1].imshow(np.dstack(v_hls_to_rgb(h,l,s)))
+        self.axes_group2[1].yaxis.set_major_locator(MaxNLocator(4))
+        self.axes_group2[1].xaxis.set_major_locator(MaxNLocator(4))
+        self.axes_group2[1].xaxis.set_ticks_position('top')
+        self.axes_group2[1].set_title(r'Probe$_0$')
+        g2cb = Colorbar(ax = self.axes_group2[0], mappable = g2im1, orientation='horizontal')
 
-        if CXP.reconstruction.probe_modes>1:
-            s5 = pylab.subplot(235)
-            s5_im = s5.imshow(abs(self.probe.modes[1].data[0]), cmap=cur_cmap)
-            s5.set_title('|probe1|')
-            plt.axis('off')
-            pylab.colorbar(s5_im)
-        else:
-            pass
+        for mode in range(1, CXP.reconstruction.probe_modes):
+            if mode<6:
+                h = ((angle(self.probe[mode]).data[0] + np.pi) / (2*np.pi)) % 1.0
+                s = np.ones_like(h)
+                l = abs(self.probe[mode]).data[0]
+                l-=l.min()
+                l/=l.max()
+                g2imN = self.axes_group2[1+mode].imshow(np.dstack(v_hls_to_rgb(h,l,s)))
+                self.axes_group2[1+mode].yaxis.set_major_locator(MaxNLocator(4))
+                self.axes_group2[1+mode].xaxis.set_major_locator(MaxNLocator(4))
+                self.axes_group2[1+mode].xaxis.set_ticks_position('top')
+                self.axes_group2[1+mode].set_title(r'Probe$_{:d}$'.format(mode))
+
         if self.ppc:
+            try:
+                self.fig2.clf()
+            except AttributeError:
+                self.fig2 = plt.figure(1)
 
-            s6 = self.f1.add_subplot(236)
+            s6 = self.fig2.add_subplot(111)
             s6_im = s6.scatter(self.positions.data[0], self.positions.data[1], s=10,
                 c='b', marker='o', alpha=0.5, edgecolors='none', label='current')
             patches = []
@@ -624,22 +713,10 @@ class CXPhasing(object):
             s6.legend(prop={'size': 6})
             s6.set_title('Position Correction')
             s6.set_aspect('equal')
-            extent = s6.get_window_extent().transformed(self.f1.dpi_scale_trans.inverted())
+            extent = s6.get_window_extent().transformed(self.fig2.dpi_scale_trans.inverted())
             pylab.savefig(self._cur_sequence_dir + '/ppc_{:d}.png'.format(self.total_its), bbox_inches=extent.expanded(1.2, 1.2), dpi=100)
             s6.set_aspect('auto')
-        else:
-            s6 = pylab.subplot(236)
-            if CXP.measurement.simulate_data:
-                if CXP.reconstruction.probe_modes>1:
-                    s6_im = s6.imshow(abs(self.input_probe[1].data[0]), cmap = cur_cmap)
-                    s6.set_title('|input_probe1|')
-                    plt.axis('off')
-                    pylab.colorbar(s6_im)
-            else:
-                s6_im = s6.imshow(nlog(fftshift(self.det_mod[np.mod(i,self.positions.total)])).data[0], cmap=cur_cmap)
-                s6.set_title('Diff Patt: {:d}'.format(i))
-                plt.axis('off')
-                pylab.colorbar(s6_im)
+
         pylab.draw()
         pylab.savefig(self._cur_sequence_dir + '/recon_{:d}.png'.format(self.total_its), dpi=60)
 
@@ -650,106 +727,40 @@ class CXPhasing(object):
         self.dbconn = self.db.conn
 
         # Select the CXParams db
-        self.db.use(CXP.db.master_db)
+        self.db.use(CXP.db.dbname)
         self.db.get_cursor()
 
         # Create table interface
-        self.t_slow_params = self.db.tables['slow_params']
-        self.t_fast_params = self.db.tables['fast_params']
+        self.t_recon_id = self.db.tables['recon_id']
+        self.t_recon_params = self.db.tables['recon_params']
 
-        self.recon_id = self.t_slow_params.get_new_recon_id()
+        self.recon_id = self.t_recon_id.get_next_id(CXP.machine.name)
         CXP.log.info('MySQL Reconstruction ID: {}'.format(self.recon_id))
 
-    def update_slow_table(self):
-        
+        # Add all of the static CXParams values
         for element in CXP.param_store.instances:
             for key, value in getattr(CXP, element).__dict__.iteritems():
-                self.slow_db_queue[key] = (value,)
-        
-        then = time.time()
-        cnt = 0
-        for k, (v,) in self.slow_db_queue.iteritems():
-            if isinstance(v, (list, tuple)):
-                v=str(v)
-            print k, v
-            self.t_slow_params.insert_on_duplicate_key_update(primary={'id': self.recon_id}, update={k: v})
-            cnt += 1
-        
-        now = time.time()
+                self.db_queue[key] = (-1, value)
 
-        self.slow_db_queue['time_per_slow_db_entry'] = (now - then)/cnt
-        CXP.log.info('{:3.2f} seconds elapsed entering {:d} values into slow db [{:3.2f} msec/entry]'.format(now-then,
-                        cnt, 1e3*(now - then) / cnt))
-
-    def update_fast_table(self):
-
-        if not self.t_fast_params.check_columns(self.fast_db_queue.keys()):
-            for key, (itnum, value) in self.fast_db_queue.iteritems():
-                if not self.t_fast_params.check_columns([key]):
-                    CXP.log.warning('MYSQL: Adding column {} to fast_params.'.format(key))
-                    ftype = 'double'
-                    if isinstance(value, (list, tuple)):
-                        value = str(value)
-                    if isinstance(value, str):
-                        ftype = 'text'
-                        def_val = ''
-                    elif isinstance(value, bool):
-                        ftype = 'bool'
-                        def_val = ''
-                    elif isinstance(value, (int, float)):
-                        ftype = 'double'
-                        def_val = 0
-                    else:
-                        ftype = 'blob'
-                        def_val = ''
-                    self.t_fast_params.add_column(col_name=key, var_type=ftype, default_value=def_val)
-            self.t_fast_params.update_fieldtypes()
+    def update_recon_param_table(self):       
 
         then = time.time()
         cnt = 0
-
-        for k, (itnum, v) in self.fast_db_queue.iteritems():
+        for k, (itnum, v) in self.db_queue.iteritems():
             if isinstance(v, (list, tuple)):
-                v=str(v)
-            self.t_fast_params.insert_on_duplicate_key_update(
-                primary={'slow_id': self.recon_id, 'iter': itnum}, update={k: v})
+                v='"{:s}"'.format(str(v))
+            elif isinstance(v, (bool)):
+                v=str(int(v))
+            elif isinstance(v, str):
+                v='"{:s}"'.format(v)
+            self.t_recon_params.insert(recon_id=self.recon_id, iter=itnum,
+                                        name='"{:s}"'.format(k), value=v)
             cnt+=1
+        self.db_queue = {}
         now = time.time()
-        self.fast_db_queue['time_per_fast_db_entry'] = (self.itnum, (now - then) / cnt)
+        self.db_queue['time_per_fast_db_entry'] = (self.itnum, (now - then) / cnt)
         CXP.log.info('{:3.2f} seconds elapsed entering {:d} values into fast db [{:3.2f} msec/entry]'.format(now-then,
                         cnt, 1e3 * (now - then) / cnt))
-
-    def calc_mse(self):
-        then = time.time()
-
-        multip = multiprocess.multiprocess(self.mse_worker)
-
-        d1, d2 = self.positions.data
-
-        for i_range in list(split_seq(range(self.positions.total),
-                CXP.machine.n_processes)):
-                multip.add_job((i_range, self.psi, self.det_mod))
-
-        results = multip.close_out()
-
-        self.av_mse = sp.mean(list(itertools.chain(*results)))
-
-        CXP.log.info('Mean square error: {:3.2f}%'.format(100 * self.av_mse))
-        self.fast_db_queue['error'] = (self.itnum, self.av_mse)
-        now = time.time()
-        CXP.log.info('Calculating MSE took {:3.2f}sec [{:3.2f}msec/position]'.format(now - then,
-                       1e3*(now - then) / self.positions.total))
-
-    @staticmethod
-    @multiprocess.worker
-    def mse_worker(args):
-        i_range, psi, det_mod = args
-        indvdl_mse = []
-        p = det_mod[0].data[0].shape[0]
-        for i in i_range:
-            psi_sum = CXModal.modal_sum(abs(fft2(psi.getat(i))))
-            indvdl_mse.append(sp.sum((abs(psi_sum - det_mod[i]) ** 2.).data[0]) / sp.sum(det_mod[i].data[0] ** 2.))
-        return indvdl_mse
 
     def log_reconstruction_parameters(self):
         """
@@ -779,12 +790,12 @@ class CXPhasing(object):
         CXP.log.info('Axial resolution: {:3.2f} [micron]'.format(1e6*axial_res))
         CXP.log.info('Lateral resolution: {:3.2f} [nm]'.format(1e9*lateral_res))
 
-        self.slow_db_queue['fresnel_number'] = (nNF,)
-        self.slow_db_queue['oversampling'] = (nOS,)
-        self.slow_db_queue['dx_s'] = (del_x_s(l, z, x),)
-        self.slow_db_queue['sample_fov'] = (del_x_s(l, z, x)*pix,)
-        self.slow_db_queue['numerical_aperture'] = (NA,)
-        self.slow_db_queue['axial_resolution'] = (axial_res,)
+        self.db_queue['fresnel_number'] = (-1, nNF)
+        self.db_queue['oversampling'] = (-1, nOS)
+        self.db_queue['dx_s'] = (-1, del_x_s(l, z, x))
+        self.db_queue['sample_fov'] = (-1, del_x_s(l, z, x)*pix)
+        self.db_queue['numerical_aperture'] = (-1, NA)
+        self.db_queue['axial_resolution'] = (-1, axial_res)
 
     def setup_dir_tree(self):
         """Setup the directory structure for a new scan id"""
@@ -913,6 +924,7 @@ class CXPhasing(object):
             self.probe.modes = [CXData(data=[probe.data[0]/(i+1)]) for i in range(CXP.reconstruction.probe_modes)]
             self.probe.normalise()
         else:
+
             dx_s = CXP.dx_s
 
         p, p2 = CXP.preprocessing.desired_array_shape, CXP.preprocessing.desired_array_shape/2
@@ -936,13 +948,16 @@ class CXPhasing(object):
         radker = sp.hypot(*sp.ogrid[-p/2:p/2,-p/2:p/2])
         gaussian = exp(-1.0*(fwhm/2.35)**-2. * radker**2.0 )
         gaussian /= gaussian.max()
-        probe = abs(gaussian*probe)* exp(complex(0.,np.pi)*ph_func/ph_func.max())
+        if CXP.measurement.simulate_data:
+            probe = abs(gaussian*probe)* exp(complex(0.,np.pi)*ph_func/ph_func.max())
+        else:
+            probe = abs(gaussian*probe).astype(complex)
 
         avdata = reduce(np.add, self.det_mod.data)/len(self.det_mod)
 
         probe  = ifft2(avdata * exp(complex(0.,1.)*sp.angle(fft2(probe))))
 
-        self.probe.modes = [CXData(data=[probe/(i+1)]) for i in range(CXP.reconstruction.probe_modes)]
+        self.probe.modes = [CXData(data=[probe])]
         
         self.probe.normalise()
 
@@ -980,86 +995,128 @@ class CXPhasing(object):
         probe = CXData()
         ob = CXData()
         det_mod = CXData()
-        probe.load('/home/david/data/sec34Robinson/S021/mle/probe_mode0.npy.npz')
-        ob.load('/home/david/data/sec34Robinson/S021/mle/object.npy.npz')
-        det_mod.load()
+        probe.load('/home/david/data/sec34Robinson/S021/mle/probe_mode0.npz')
+        ob.load('/home/david/data/sec34Robinson/S021/mle/object.npz')
+        det_mod.load('/home/david/data/sec34Robinson/S021/mle/det_mod.npz')
 
         scalar_product = lambda a, b: CXData.inner_product(a[0],b[0])+CXData.inner_product(a[1],b[1])
 
-        for j in range(CXP.reconstruction.mle_its):
+        self.positions = CXData(name='positions', data=[])
+        self.ptycho_mesh()
+        self.p2 = CXP.preprocessing.desired_array_shape
 
-            for r in range(CXP.reconstruction.mle_its):
-                gn = self.calc_derivatives(probe, ob, det_mod)
+        pdb.set_trace()
 
-                if r==0:
-                    beta = 0
-                    delta_old = 0
-                else:
-                    beta = (scalar_product(gn, gn) - scalar_product(gn, gn_old))/scalar_product(gn_old, gn_old)
+        for r in range(CXP.mle.its):
+            gn = self.calc_derivatives(probe, ob, det_mod)
 
-                delta = -gn + beta*delta_old
+            if r==0:
+                beta = 0
+                delta_old = 0
+            else:
+                beta = (scalar_product(gn, gn) - scalar_product(gn, gn_old))/scalar_product(gn_old, gn_old)
 
-                coef = sp.zeros((9))
+            delta = -gn + beta*delta_old
 
-                for i in range(self.positions.total):
+            coef = sp.zeros((9))
 
-                    a = fft2( self.probe*delta[0][d1[i] - self.p2:d1[i] + self.p2, d2[i] - self.p2:d2[i] + self.p2] +
-                              self.object[d1[i] - self.p2:d1[i] + self.p2, d2[i] - self.p2:d2[i] + self.p2]*delta[1] )
+            for i in range(self.positions.total):
 
-                    b = fft2(delta[0][d1[i] - self.p2:d1[i] + self.p2, d2[i] - self.p2:d2[i] + self.p2]*delta[1])
+                a = fft2( self.probe*delta[0][d1[i] - self.p2:d1[i] + self.p2, d2[i] - self.p2:d2[i] + self.p2] +
+                          self.object[d1[i] - self.p2:d1[i] + self.p2, d2[i] - self.p2:d2[i] + self.p2]*delta[1] )
 
-                    psi_bar =  fft2(self.probe * self.object[d1[i] - self.p2:d1[i] + self.p2, d2[i] - self.p2:d2[i] + self.p2])
+                b = fft2(delta[0][d1[i] - self.p2:d1[i] + self.p2, d2[i] - self.p2:d2[i] + self.p2]*delta[1])
 
-                    A0 = abs(psi_bar)**2.0 - det_mod
+                psi_bar =  fft2(self.probe * self.object[d1[i] - self.p2:d1[i] + self.p2, d2[i] - self.p2:d2[i] + self.p2])
 
-                    A1 = 2.0*np.real(psi_bar*conj(a))
+                A0 = abs(psi_bar)**2.0 - det_mod
 
-                    A2 = 2.0*np.real(psi_bar*conj(b)) + abs(a)**2.0
+                A1 = 2.0*np.real(psi_bar*conj(a))
 
-                    A3 = 2.0*np.real(a*conj(b))
+                A2 = 2.0*np.real(psi_bar*conj(b)) + abs(a)**2.0
 
-                    A4 = abs(b)**2.0
+                A3 = 2.0*np.real(a*conj(b))
 
-                    coef[8]+=sum((A0**2.0)/(det_mod+1))
-                    coef[7]+=sum((2*A0*A1)/(det_mod+1))
-                    coef[6]+=sum((2*A0*A2+A1**2.0)/(det_mod+1))
-                    coef[5]+=sum((2*A0*A3+2*A1*A2)/(det_mod+1))
-                    coef[4]+=sum((2*A0*A4+2*A1*A3+A2**2.0)/(det_mod+1))
-                    coef[3]+=sum((2*A1*A4+2*A1*A3)/(det_mod+1))
-                    coef[2]+=sum((2*A2*A4+A3**2)/(det_mod+1))
-                    coef[1]+=sum((2*A3*A4)/(det_mod+1))
-                    coef[0]+=sum((A4**2)/(det_mod+1))
+                A4 = abs(b)**2.0
 
-                dcoefs = [(8-i)*coef[i] for i in range(0,8)]
+                coef[8]+=sum((A0**2.0)/(det_mod+1))
+                coef[7]+=sum((2*A0*A1)/(det_mod+1))
+                coef[6]+=sum((2*A0*A2+A1**2.0)/(det_mod+1))
+                coef[5]+=sum((2*A0*A3+2*A1*A2)/(det_mod+1))
+                coef[4]+=sum((2*A0*A4+2*A1*A3+A2**2.0)/(det_mod+1))
+                coef[3]+=sum((2*A1*A4+2*A1*A3)/(det_mod+1))
+                coef[2]+=sum((2*A2*A4+A3**2)/(det_mod+1))
+                coef[1]+=sum((2*A3*A4)/(det_mod+1))
+                coef[0]+=sum((A4**2)/(det_mod+1))
 
-                rts = np.roots(dcoef)
+            dcoefs = [(8-i)*coef[i] for i in range(0,8)]
 
-                lhoods = [self.gaussian_likelihood(element) for element in rts]
-                gamma = rts[lhoods.index(lhoods.min())]
+            rts = np.roots(dcoef)
 
-                ob += gamma*delta[0]
-                probe += gamma*delta[1]
+            lhoods = [self.gaussian_likelihood(element) for element in rts]
+            gamma = rts[lhoods.index(lhoods.min())]
 
-                gn_old = [gn[0].copy(), gn[1].copy()]
-                delta_old = [delta[0].copy(), delta[1].copy()]
+            ob += gamma*delta[0]
+            probe += gamma*delta[1]
 
-    def gaussian_likelihood(self):
+            gn_old = [gn[0].copy(), gn[1].copy()]
+            delta_old = [delta[0].copy(), delta[1].copy()]
+
+    def gaussian_likelihood(self, probe, ob):
 
         d1, d2 = self.positions.data
         likelihood = 0
         for i in range(self.position.total):
-            view = self.probe * self.object[d1[i] - self.p2:d1[i] + self.p2, d2[i] - self.p2:d2[i] + self.p2]
-
+            view = probe * ob[d1[i] - self.p2:d1[i] + self.p2, d2[i] - self.p2:d2[i] + self.p2]
             likelihood += sum((abs(fft2(view))**2.0 - det_mod[i]**2.0)**2.0/(2*(det_mod[i]+1.0)))
 
-    def calc_derivatives(self, probe, object, det_mod):
-        chi = lambda view, dm: ifft2(((abs(spf(fft2(view)))-dm)/(dm+1.0))*fft2(view))
+    def calc_derivatives(self, probe, ob, det_mod):
+        chi = lambda view, dm: ifft2(((abs(fft2(view))-dm)/(dm+1.0))*fft2(view))
         gor = sp.zeros((self.ob_p, self.ob_p),complex)
         gpr = sp.zeros((self.ob_p, self.ob_p),complex)
+        d1, d2 = self.positions.data
+        id1, id2 = d1//1, d2//1
         for i in range(self.positions.total):
-            view = self.probe * self.object[d1[i] - self.p2:d1[i] + self.p2, d2[i] - self.p2:d2[i] + self.p2]
+            view = probe * ob[d1[i] - self.p2:d1[i] + self.p2, d2[i] - self.p2:d2[i] + self.p2]
             for mode in range(CXP.reconstruction.probe_modes):
-                gor[id1[i] - self.p2:id1[i] + self.p2, id2[i] - self.p2:id2[i] + self.p2]+= self.probe[mode][0]*conj(chi(view[mode][0], det_mod[i]))
-                gpr += self.object[id1[i] - self.p2:id1[i] + self.p2, id2[i] - self.p2:id2[i] + self.p2] *conj(chi(view[mode][0], det_mod[i]))
+                gor[id1[i] - self.p2:id1[i] + self.p2, id2[i] - self.p2:id2[i] + self.p2]+= probe[mode][0]*conj(chi(view[mode][0], det_mod[i]))
+                gpr += ob[id1[i] - self.p2:id1[i] + self.p2, id2[i] - self.p2:id2[i] + self.p2] *conj(chi(view[mode][0], det_mod[i]))
         
         return (gor, gpr)
+
+    def db_plot(self):
+        pdb.set_trace()
+
+        n_names = len(self.t_recon_params.select(vals='distinct name', 
+                        where='recon_id={:d} and iter>-1'.format(self.recon_id)))
+        res = self.t_recon_params.select(vals='name, value, iter', 
+                       where='recon_id={:d} and iter>-1'.format(self.recon_id))
+
+        names = []
+        enum = {}
+        for entry in res:
+            if isinstance(entry['value'], str):
+                if entry['name'] in enum.keys():
+                    if entry['value'] in enum[entry['name']]:
+                        pass
+                    else:
+                        enum[entry['name']].append(entry['value'])
+                else:
+                    enum[entry['name']] = [entry['value']]
+
+        data = sp.zeros((n_names, self.itnum))
+        for entry in res:
+            if entry['name'] not in names:
+                names.append(entry['name'])
+            idx = names.index(entry['name'])
+            if isinstance(entry['value'], str):
+                entry['value'] = enum[entry['name']].index(entry['value'])
+            data[idx, entry['iter']] = entry['value']
+
+        db_fig = plt.figure()
+
+        for i in range(n_names):
+            s=plt.subplot('{0:d}1{0:d}'.format(i))
+            s.plot(data[i,:], label=names[i])
+            s.set_title(names[i])
+        pylab.savefig(self._cur_sequence_dir + '/db_plot.png', dpi=100)

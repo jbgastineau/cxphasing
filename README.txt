@@ -13,7 +13,7 @@
   The Latest Version
   ------------------
 
-  The latest version can be checked out from bitbucket.org if you have access.
+  The latest version can be checked out from giuthub.
 
   Documentation
   -------------

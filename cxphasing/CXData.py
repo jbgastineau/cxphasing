@@ -293,6 +293,8 @@ class CXData(CXFileReader):
             for i in xrange(len(self.data)):
                 l.append(self.data[i]+other)
             return CXData(data=l)
+        elif isinstance(other, CXModal):
+            return CXModal.__add__(other, self)
 
     def __iadd__(self, other):
         if isinstance(other, CXData):
@@ -303,6 +305,8 @@ class CXData(CXFileReader):
             for i in xrange(len(self.data)):
                 self.data[i]+=other
             return self
+        elif isinstance(other, CXModal):
+            raise("The meaning of += is ambiguous for these datatypes")
 
     def __sub__(self, other):
         if isinstance(other, CXData):
@@ -310,21 +314,25 @@ class CXData(CXFileReader):
             for i in xrange(len(self.data)):
                 l.append(self.data[i]-other.data[i])
             return CXData(data=l)
-        if isinstance(other, (int, float, complex)):
+        elif isinstance(other, (int, float, complex)):
             l=[]
             for i in xrange(len(self.data)):
                 l.append(self.data[i]-other)
             return CXData(data=l)
+        elif isinstance(other, CXModal):
+            return CXModal.__sub__(other, self)*-1.0
 
     def __isub__(self, other):
         if isinstance(other, CXData):
             for i in xrange(len(self.data)):
                 self.data[i]-=other.data[i]
             return self
-        if isinstance(other, (int, float, complex)):
+        elif isinstance(other, (int, float, complex)):
             for i in xrange(len(self.data)):
                 self.data[i]-=other.data
             return self
+        elif isinstance(other, CXModal):
+            raise("The meaning of -= is ambiguous for these datatypes")
 
     def __pow__(self, power):
         l=[]
@@ -343,6 +351,8 @@ class CXData(CXFileReader):
             for i in xrange(len(self.data)):
                 l.append(self.data[i]*other)
             return CXData(data=l)
+        elif isinstance(other, CXModal):
+            return CXModal.__mul__(other, self)
 
     def __rmul__(self, other):
         return self.__mul__(other)
@@ -356,6 +366,8 @@ class CXData(CXFileReader):
             for i in xrange(len(self.data)):
                 self.data[i]*=other
             return self
+        elif isinstance(other, CXModal):
+            raise("The meaning of *= is ambiguous for these datatypes")
 
     def __div__(self, other):
         if isinstance(other, CXData):
@@ -368,6 +380,8 @@ class CXData(CXFileReader):
             for i in xrange(len(self.data)):
                 l.append(self.data[i]/other)
             return CXData(data=l)
+        elif isinstance(other, CXModal):
+            raise("The meaning of / is ambiguous for these datatypes")
 
     def __rdiv__(self, other):
         return self.__mul__(other)
@@ -381,6 +395,8 @@ class CXData(CXFileReader):
             for i in xrange(len(self.data)):
                 self.data[i]/=other
             return self
+        elif isinstance(other, CXModal):
+            raise("The meaning of /= is ambiguous for these datatypes")
 
     def __len__(self):
         return len(self.data)
@@ -1121,11 +1137,17 @@ class CXModal(object):
     def __add__(self, other):
         return CXModal._addsubmuldiv(operator.add, self, other)
 
+    def __radd__(self, other):
+        return CXModal._addsubmuldiv(operator.add, self, other)
+
     def __iadd__(self, other):
         return CXModal._iaddsubmuldiv(operator.iadd, self, other)
 
     def __sub__(self, other):
         return CXModal._addsubmuldiv(operator.sub, self, other)
+
+    def __rsub__(self, other):
+        return CXModal._addsubmuldiv(operator.sub, other, self)
 
     def __isub__(self, other):
         return CXModal._iaddsubmuldiv(operator.isub, self, other)

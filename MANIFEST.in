@@ -1,3 +1,4 @@
 include *.txt
+recursive-include *.sql
 recursive-include data *.npy
 recursive-include docs *.txt

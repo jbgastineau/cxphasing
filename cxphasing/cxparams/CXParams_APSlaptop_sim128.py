@@ -35,6 +35,7 @@ experiment =      param_store('experiment')
 measurement =     param_store('measurement')
 preprocessing =   param_store('preprocessing')
 reconstruction =  param_store('reconstruction')
+mle =             param_store('mle')
 
 """
 --------
@@ -51,7 +52,7 @@ as they are calculated.
 db.dbhost = 'localhost'
 db.dbuser = 'david'
 db.dbpass = 'david'
-db.master_db = 'CXP_master'
+db.dbname = 'CXP_master'
 
 
 """
@@ -67,6 +68,7 @@ n_processes: define how many processes to use for parallel computation.
 """
 
 machine.n_processes = -1
+machine.name = 'APSlaptop'
 
 """
 -------
@@ -243,14 +245,18 @@ reconstruction.flip_mesh_lr =                           False # Reverse ptycho g
 reconstruction.flip_mesh_ud =                           False # Reverse ptycho grid up-down
 reconstruction.flip_fast_axis =                         False # Swap fast axis from vertical to horizontal
 reconstruction.ptycho_subpixel_shift =                  False
-reconstruction.probe_position_correction =              False
-reconstruction.begin_probe_position_correction =        5 # Begin updating after N iterations
+reconstruction.probe_position_correction =              True
+reconstruction.begin_probe_position_correction =        100 # Begin updating after N iterations
 reconstruction.ppc_length =                             100 # Update positions for N iterations
 reconstruction.ppc_trial_positions =                    4
 reconstruction.ppc_search_radius =                      5 # pixels
 reconstruction.initial_position_jitter_radius =         1
 reconstruction.probe_modes =                            2
-reconstruction.calc_chi_squared =                       False # Can be slow for large datasets
+
+"""
+Maximum Likelihood Estimation
+"""
+mle.its =                                               500
 
 
 

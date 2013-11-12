@@ -78,7 +78,7 @@ Parameters related to the overview of what should happen during the reconstructi
 """
 
 actions.automate =              False
-actions.preprocess_data =       True
+actions.preprocess_data =       False
 actions.process_dpc =           False
 actions.do_phase_retrieval =    True
 
@@ -133,7 +133,7 @@ io.whitefield_filename =        ''
 io.whitefield_filename_range =  ''
 io.darkfield_filename =         ''
 io.darkfield_filename_range =   ''
-io.initial_probe_guess =        '/home/david/data/sec34Robinson/S021/sequences/sequence_15/probe_mode0.npy.npz'
+io.initial_probe_guess =        ''#/home/david/data/sec34Robinson/S021/sequences/sequence_15/probe_mode0.npy.npz'
 io.simulation_sample_filename = []
 
 
@@ -231,24 +231,26 @@ preprocessing.calc_stxm_image =          True
 Reconstruction 
 """
 
-reconstruction.sequence =                               17
-reconstruction.ptycho_its =                             1000
-reconstruction.begin_updating_probe =                   20
+reconstruction.sequence =                               1
+reconstruction.ptycho_its =                             500
+reconstruction.begin_updating_probe =                   50
 reconstruction.begin_modal_reconstruction =             100
-reconstruction.algorithm =                              {'er':2, 'dm':2}
-reconstruction.probe_object_its =                       1 # Number of times to update probe and object contiguously
+reconstruction.algorithm =                              {'er':20, 'dm':1}
+reconstruction.probe_object_its =                       1 # Number of times to update probe and object contiguouslyo'
 reconstruction.verbose =                                True
 reconstruction.flip_mesh_lr =                           False # Reverse ptycho grid left-right
 reconstruction.flip_mesh_ud =                           False # Reverse ptycho grid up-down
 reconstruction.flip_fast_axis =                         False # Swap fast axis from vertical to horizontal
 reconstruction.ptycho_subpixel_shift =                  False
-reconstruction.probe_position_correction =              False
-reconstruction.ppc_begin =                              3000 # Begin updating after N iterations
+reconstruction.probe_position_correction =              True
+reconstruction.begin_probe_position_correction =        200 # Begin updating after N iterations
 reconstruction.ppc_length =                             100 # Update positions for N iterations
-reconstruction.ppc_trial_positions =                    4
+reconstruction.ppc_trial_positions =                    6 # Set this equal to a multiple of the number of processors on the machine
 reconstruction.ppc_search_radius =                      5 # pixels
-reconstruction.initial_position_jitter_radius =         5
-reconstruction.probe_modes =                            4
+reconstruction.initial_position_jitter_radius =         1
+reconstruction.probe_modes =                            2
+reconstruction.mle_its =                                1000
+reconstruction.calc_chi_squared =                       False
 
 
 

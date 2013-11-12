@@ -1,6 +1,10 @@
 import Image
 import scipy as sp
 import pdb
+import libtiff
+
+def tif_to_numpy_libtiff(filename):
+    return libtiff.TIFF.open(filename).read_image()
 
 def tif_to_numpy(filename):
     return sp.misc.fromimage(Image.open(filename))
@@ -64,7 +68,7 @@ def threshhold(arr,val=None):
     return sp.where(arr>val,arr,val)-val
 
 def open_mmpad_tif(filename):
-    img = tif_to_numpy(filename)
+    img = tif_to_numpy_libtiff(filename)
     img = remove_aliens(img)
     img = pedestal_correct(img)
     return threshhold(img)
