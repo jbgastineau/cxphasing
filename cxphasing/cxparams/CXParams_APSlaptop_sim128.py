@@ -31,6 +31,7 @@ db =              param_store('db')
 machine =         param_store('machine')
 actions =         param_store('actions')
 io =              param_store('io')
+simulation =      param_store('simulation')
 experiment =      param_store('experiment') 
 measurement =     param_store('measurement')
 preprocessing =   param_store('preprocessing')
@@ -53,6 +54,7 @@ db.dbhost = 'localhost'
 db.dbuser = 'david'
 db.dbpass = 'david'
 db.dbname = 'CXP_master'
+db.usemysql = True
 
 
 """
@@ -139,6 +141,16 @@ io.simulation_sample_filename = ['/home/david/python/lena128.npy',
                                  '/home/david/python/baboon128.npy']
 io.initial_probe_guess =        ''
 
+
+"""
+----------
+simulation
+----------
+"""
+simulation.sample_transmission = [0.2, 1.0]
+simulation.noise_model = None
+simulation.total_photons = -1
+simulation.sample_phase_shift = np.pi/3.0
 
 """
 ----------
@@ -251,7 +263,8 @@ reconstruction.ppc_length =                             100 # Update positions f
 reconstruction.ppc_trial_positions =                    4
 reconstruction.ppc_search_radius =                      5 # pixels
 reconstruction.initial_position_jitter_radius =         1
-reconstruction.probe_modes =                            2
+reconstruction.probe_modes =                            1
+reconstruction.calc_chi_squared =                       False
 
 """
 Maximum Likelihood Estimation

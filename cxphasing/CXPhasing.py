@@ -200,9 +200,9 @@ class CXPhasing(object):
             self.total_its += 1
             if hasmysql:
                 self.update_recon_param_table()
-                if self.total_its%10:
+                #if self.total_its%10:
                     # Plot from db every 10th iteration
-                    self.db_plot()
+                #    self.db_plot()
             if self.itnum > 0:
                 self.update_figure(self.itnum)
 
@@ -286,7 +286,7 @@ class CXPhasing(object):
         
 
         # Limit total counts
-        if CXP.simulation.total_photons<0:
+        if CXP.simulation.total_photons>0:
             for i in range(self.positions.total):
                 self.det_mod.data[i] -= self.det_mod.data[i].min()
                 self.det_mod.data[i] *= sp.floor(CXP.simulate_data.total_photons/sp.sum(self.det_mod.data[i]))
@@ -658,18 +658,19 @@ class CXPhasing(object):
         self.axes_group2[1].set_title(r'Probe$_0$')
         g2cb = Colorbar(ax = self.axes_group2[0], mappable = g2im1, orientation='horizontal')
 
-        for mode in range(1, CXP.reconstruction.probe_modes):
-            if mode<6:
-                h = ((angle(self.probe[mode]).data[0] + np.pi) / (2*np.pi)) % 1.0
-                s = np.ones_like(h)
-                l = abs(self.probe[mode]).data[0]
-                l-=l.min()
-                l/=l.max()
-                g2imN = self.axes_group2[1+mode].imshow(np.dstack(v_hls_to_rgb(h,l,s)))
-                self.axes_group2[1+mode].yaxis.set_major_locator(MaxNLocator(4))
-                self.axes_group2[1+mode].xaxis.set_major_locator(MaxNLocator(4))
-                self.axes_group2[1+mode].xaxis.set_ticks_position('top')
-                self.axes_group2[1+mode].set_title(r'Probe$_{:d}$'.format(mode))
+        if self.itnum>CXP.reconstruction.begin_modal_reconstruction:
+            for mode in range(1, CXP.reconstruction.probe_modes):
+                if mode<6:
+                    h = ((angle(self.probe[mode]).data[0] + np.pi) / (2*np.pi)) % 1.0
+                    s = np.ones_like(h)
+                    l = abs(self.probe[mode]).data[0]
+                    l-=l.min()
+                    l/=l.max()
+                    g2imN = self.axes_group2[1+mode].imshow(np.dstack(v_hls_to_rgb(h,l,s)))
+                    self.axes_group2[1+mode].yaxis.set_major_locator(MaxNLocator(4))
+                    self.axes_group2[1+mode].xaxis.set_major_locator(MaxNLocator(4))
+                    self.axes_group2[1+mode].xaxis.set_ticks_position('top')
+                    self.axes_group2[1+mode].set_title(r'Probe$_{:d}$'.format(mode))
 
         if self.ppc:
             try:
